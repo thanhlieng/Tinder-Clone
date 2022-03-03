@@ -6,6 +6,7 @@ import React from "react";
 import Home from "../Screens/Home";
 import Message from "../Screens/Message";
 import Matched from "../Screens/Matched";
+import Home1 from "../Screens/Home1";
 
 const BottomNavigationTab = createMaterialBottomTabNavigator();
 
@@ -16,7 +17,7 @@ const BottomNavigation = () => {
       activeColor="#FF565B"
       inactiveColor="#C7C7C7"
       shifting={false}
-      labeled={false}
+      labeled={true}
       barStyle={{ backgroundColor: "#FFFFFF" }}
       screenOptions={{ headerShown: true }}
     >
@@ -42,9 +43,9 @@ const BottomNavigation = () => {
       />
       <BottomNavigationTab.Screen
         name="Home1"
-        component={Home}
+        component={Home1}
         options={{
-          tabBarLabel: "Home",
+          tabBarLabel: "Home1",
           tabBarIcon: ({ color }) => (
             <Ionicons name="heart" color={color} size={26} />
           ),

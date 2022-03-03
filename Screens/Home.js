@@ -1,4 +1,4 @@
-import React, { Component, useState } from "react";
+import React, { Component, useState, useRef } from "react";
 import Swiper from "react-native-deck-swiper-renewed";
 import {
   Button,
@@ -7,7 +7,6 @@ import {
   View,
   SafeAreaView,
   StatusBar,
-  TouchableOpacity,
   Image,
   ImageBackground,
 } from "react-native";
@@ -15,6 +14,21 @@ import tw from "tailwind-react-native-classnames";
 import Feather from "react-native-vector-icons/Feather";
 import Auth from "../ggAuth/Auth";
 import { LinearGradient } from "expo-linear-gradient";
+import StackNavigator from "@react-navigation/native-stack";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  useAnimatedGestureHandler,
+} from "react-native-reanimated";
+import {
+  GestureHandlerRootView,
+  GestureDetector,
+  TapGestureHandler,
+  Gesture,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from "react-native-gesture-handler";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 // demo purposes only
 function* range(start, end) {
@@ -27,6 +41,10 @@ const Home = () => {
   const [card, setcard] = useState(range(1, 50));
   const [cardIndex, setcardIndex] = useState(0);
   const { user, Logout } = Auth();
+  const pressedRed = useSharedValue(false);
+  const pressedGreen = useSharedValue(false);
+  const Swiperef = useRef(null);
+
   const renderCard = (card, index) => {
     return (
       <View style={styles.card}>
@@ -38,11 +56,7 @@ const Home = () => {
               resizeMode="stretch"
             >
               <LinearGradient
-                colors={[
-                  "rgba(0, 0, 0, 0)",
-                  "rgba(0, 0, 0, 0.5)",
-                  "rgba(0, 0, 0, 1)",
-                ]}
+                colors={["transparent", "black"]}
                 style={tw`absolute bottom-0 w-full h-40`}
               ></LinearGradient>
             </ImageBackground>
@@ -66,6 +80,42 @@ const Home = () => {
     );
   };
 
+  const lefteventHandler = useAnimatedGestureHandler({
+    onStart: (event, ctx) => {
+      pressedRed.value = true;
+    },
+    onEnd: (event, ctx) => {
+      pressedRed.value = false;
+    },
+  });
+
+  const righteventHandler = useAnimatedGestureHandler({
+    onStart: (event, ctx) => {
+      pressedGreen.value = true;
+    },
+    onEnd: (event, ctx) => {
+      pressedGreen.value = false;
+    },
+  });
+
+  const leftTouchAnimation = useAnimatedStyle(() => {
+    return {
+      backgroundColor: pressedRed.value
+        ? "rgba(239, 68, 68, 0.3)"
+        : "transparent",
+      transform: [{ scale: pressedRed.value ? 1.3 : 1 }],
+    };
+  });
+
+  const rightTouchAnimation = useAnimatedStyle(() => {
+    return {
+      backgroundColor: pressedGreen.value
+        ? "rgba(34, 197, 94, 0.3)"
+        : "transparent",
+      transform: [{ scale: pressedGreen.value ? 1.3 : 1 }],
+    };
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={tw`h-14 flex-row justify-center relative bg-white`}>
@@ -87,6 +137,7 @@ const Home = () => {
       </View>
       <View style={tw`bg-black flex-1`}>
         <Swiper
+          ref={Swiperef}
           backgroundColor={"#FFFFFF"}
           cards={card}
           cardIndex={cardIndex}
@@ -135,23 +186,56 @@ const Home = () => {
           }}
           animateOverlayLabelsOpacity
           animateCardOpacity
-          swipeBackCard
           disableBottomSwipe={true}
           disableTopSwipe={true}
         ></Swiper>
-        <View
+        <GestureHandlerRootView
           style={[
             tw`h-16 bg-transparent flex-row justify-around`,
-            { marginVertical: "138%", marginHorizontal: "5%" },
+            { marginVertical: "138%", marginHorizontal: "0%" },
           ]}
         >
-          <TouchableOpacity
-            style={tw`rounded-full bg-red-500 w-12 h-12 self-end`}
-          ></TouchableOpacity>
-          <TouchableOpacity
-            style={tw`rounded-full bg-green-500 w-12 h-12 self-end`}
-          ></TouchableOpacity>
-        </View>
+          <TapGestureHandler onGestureEvent={lefteventHandler}>
+            <Animated.View
+              style={[
+                tw`rounded-full bg-white w-12 h-12 self-end`,
+                leftTouchAnimation,
+              ]}
+            >
+              <TouchableWithoutFeedback
+                onPress={() => Swiperef.current.swipeLeft()}
+                style={tw`w-12 h-12 justify-center rounded-full border-red-500 border-2 bg-transparent`}
+              >
+                <Ionicons
+                  style={tw`self-center`}
+                  name="md-close"
+                  color={"red"}
+                  size={32}
+                />
+              </TouchableWithoutFeedback>
+            </Animated.View>
+          </TapGestureHandler>
+          <TapGestureHandler onGestureEvent={righteventHandler}>
+            <Animated.View
+              style={[
+                tw`rounded-full bg-transparent w-12 h-12 self-end`,
+                rightTouchAnimation,
+              ]}
+            >
+              <TouchableWithoutFeedback
+                onPress={() => Swiperef.current.swipeRight()}
+                style={tw`w-12 h-12 justify-center rounded-full border-green-500 border-2 bg-transparent`}
+              >
+                <Ionicons
+                  style={tw`self-center `}
+                  name="heart"
+                  color={"green"}
+                  size={26}
+                />
+              </TouchableWithoutFeedback>
+            </Animated.View>
+          </TapGestureHandler>
+        </GestureHandlerRootView>
       </View>
     </SafeAreaView>
   );
@@ -160,7 +244,7 @@ const Home = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5FCFF",
+    backgroundColor: "transparent",
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   card: {
@@ -177,12 +261,12 @@ const styles = StyleSheet.create({
     fontSize: 50,
     backgroundColor: "transparent",
   },
-  done: {
-    textAlign: "center",
-    fontSize: 30,
-    color: "white",
-    backgroundColor: "transparent",
-  },
+  // done: {
+  //   textAlign: "center",
+  //   fontSize: 30,
+  //   color: "white",
+  //   backgroundColor: "transparent",
+  // },
 });
 
 export default Home;
