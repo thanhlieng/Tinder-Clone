@@ -1,7 +1,6 @@
-import React, { Component, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import Swiper from "react-native-deck-swiper-renewed";
 import {
-  Button,
   StyleSheet,
   Text,
   View,
@@ -14,7 +13,6 @@ import tw from "tailwind-react-native-classnames";
 import Feather from "react-native-vector-icons/Feather";
 import Auth from "../ggAuth/Auth";
 import { LinearGradient } from "expo-linear-gradient";
-import StackNavigator from "@react-navigation/native-stack";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -22,9 +20,7 @@ import Animated, {
 } from "react-native-reanimated";
 import {
   GestureHandlerRootView,
-  GestureDetector,
   TapGestureHandler,
-  Gesture,
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from "react-native-gesture-handler";
@@ -261,12 +257,6 @@ const styles = StyleSheet.create({
     fontSize: 50,
     backgroundColor: "transparent",
   },
-  // done: {
-  //   textAlign: "center",
-  //   fontSize: 30,
-  //   color: "white",
-  //   backgroundColor: "transparent",
-  // },
 });
 
 export default Home;

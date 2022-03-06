@@ -1,106 +1,82 @@
 import {
-  View,
-  Text,
-  Button,
-  SafeAreaView,
   StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
   StatusBar,
+  ImageBackground,
   Image,
   TouchableOpacity,
-  Touchable,
 } from "react-native";
 import React from "react";
-import Auth from "../ggAuth/Auth";
-import { useNavigation } from "@react-navigation/core";
 import tw from "tailwind-react-native-classnames";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  useAnimatedGestureHandler,
-} from "react-native-reanimated";
-import { TapGestureHandler, State } from "react-native-gesture-handler";
-import GestureHandlerRootView from "react-native-gesture-handler";
+import Auth from "../ggAuth/Auth";
 
 const Matched = () => {
-  const { Logout, user } = Auth();
-  const navigation = useNavigation();
-  const offset = useSharedValue(0);
-  const pressed = useSharedValue(false);
-
-  const animatedStyles = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: offset.value * 255 }],
-    };
-  });
-
-  const TapEventHandler = useAnimatedGestureHandler({
-    onStart: (event, ctx) => {
-      pressed.value = true;
-      console.log("pressed");
-    },
-    onEnd: (event, ctx) => {
-      pressed.value = false;
-    },
-  });
-
-  const animatedStylesTap = useAnimatedStyle(() => {
-    return {
-      backgroundColor: pressed.value ? "#11FF34" : "#10C4E3",
-      scale: withSpring(pressed.value ? 1.2 : 1),
-    };
-  });
-
-  const onSingleTapEvent = (event) => {
-    if (event.nativeEvent.state === State.ACTIVE) {
-      alert("Hey single tap!");
-    }
-  };
+  const { user } = Auth();
 
   return (
-    <>
-      {/* <View style={tw`h-14 flex-row justify-center relative bg-white`}>
-        <TouchableOpacity
-          onPress={Logout}
-          style={tw`absolute left-4 h-11 w-11 justify-center self-center`}
-        >
+    <SafeAreaView style={styles.container}>
+      <ImageBackground
+        source={{ uri: "https://tinder.com/static/tinder.png" }}
+        resizeMode="cover"
+        style={tw`flex-1`}
+      >
+        <View style={styles.textMatch}>
+          <Text style={tw`text-green-600 text-4xl pb-2`}>It's a Matched</Text>
+          <Text style={tw`text-green-600 text-xl pt-2`}>
+            You guys have like each other
+          </Text>
+        </View>
+        <View style={styles.imageMatch}>
           <Image
-            resizeMode="contain"
             source={{ uri: user.photoURL }}
-            style={[tw`w-9 h-9 rounded-full self-center`, styles.profileImage]}
-          />
-        </TouchableOpacity>
-        <Image
-          resizeMode="contain"
-          style={tw`h-full w-20 self-center`}
-          source={require("../Tinder-Logo.png")}
-        />
-      </View> */}
-      <TapGestureHandler onHandlerStateChange={onSingleTapEvent}>
-        <View style={styles.box} />
-      </TapGestureHandler>
-      <Button
-        onPress={() => (offset.value = withSpring(Math.random()))}
-        title="Move"
-      />
-    </>
+            style={[tw`w-32 h-32`, styles.matchImage]}
+          ></Image>
+          <Image
+            style={[tw`w-32 h-32`, styles.matchImage]}
+            source={{ uri: user.photoURL }}
+          ></Image>
+        </View>
+        <View style={styles.buttonMatch}>
+          <TouchableOpacity>
+            <Text style={tw`text-white text-lg`}>Keep Swipping</Text>
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Text style={tw`text-white pt-10 text-lg`}>
+              Send message imidiately
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
+    </SafeAreaView>
   );
 };
 
+export default Matched;
+
 const styles = StyleSheet.create({
-  androidSafeArea: {
+  container: {
+    flex: 1,
+    backgroundColor: "transparent",
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
-  profileImage: {
-    overflow: "hidden",
-    borderRadius: 1000,
+  textMatch: {
+    alignItems: "center",
+    marginVertical: "25%",
   },
-  box: {
-    width: 100,
-    height: 100,
-    backgroundColor: "black",
-    marginTop: 100,
+  imageMatch: {
+    paddingTop: 20,
+    justifyContent: "space-around",
+    flexDirection: "row",
+  },
+  buttonMatch: {
+    alignItems: "center",
+    marginVertical: "25%",
+  },
+  matchImage: {
+    borderRadius: 99999,
+    borderWidth: 5,
+    borderColor: "white",
   },
 });
-
-export default Matched;
