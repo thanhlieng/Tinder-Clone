@@ -48,7 +48,7 @@ const Home = () => {
           <>
             <ImageBackground
               source={require("../tesst.jpg")}
-              style={tw`absolute top-0 h-full w-full`}
+              style={tw`absolute top-0 h-full w-full rounded-sm`}
               resizeMode="stretch"
             >
               <LinearGradient

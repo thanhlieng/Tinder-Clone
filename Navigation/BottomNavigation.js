@@ -7,6 +7,7 @@ import Home from "../Screens/Home";
 import Message from "../Screens/Message";
 import Matched from "../Screens/Matched";
 import Home1 from "../Screens/Home1";
+import Navigation from "../Navigation/Navigation";
 
 const BottomNavigationTab = createMaterialBottomTabNavigator();
 
@@ -39,6 +40,8 @@ const BottomNavigation = () => {
           tabBarIcon: ({ color }) => (
             <Ionicons name="grid" color={color} size={26} />
           ),
+          headerShown: true,
+          headerTitle: "Message",
         }}
       />
       <BottomNavigationTab.Screen

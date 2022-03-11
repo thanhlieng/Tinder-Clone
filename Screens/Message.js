@@ -7,8 +7,12 @@ import {
   FlatList,
   TextInput,
   Text,
+  TouchableOpacity,
+  Image,
 } from "react-native";
 import Auth from "../ggAuth/Auth";
+import tw from "tailwind-react-native-classnames";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 const Item = ({ title }) => (
   <View style={styles.listItem}>
@@ -45,18 +49,47 @@ const Message = () => {
   const renderItem = ({ item }) => <Item title={item.title} />;
   return (
     <SafeAreaView style={styles.container}>
-      <TextInput
-        onChangeText={(setText) => handleSearch(setText)}
-        style={styles.searchInput}
-        placeholder="Type a message to search"
-        autoComplete={false}
-        clearButtonMode="always"
-      />
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-      />
+      <View style={tw`h-14 flex-row justify-center relative bg-white`}>
+        <TouchableOpacity
+          onPress={Logout}
+          style={tw`absolute left-4 h-11 w-11 justify-center self-center`}
+        >
+          <Image
+            resizeMode="contain"
+            source={{ uri: user.photoURL }}
+            style={[tw`w-9 h-9 rounded-full self-center`, styles.profileImage]}
+          />
+        </TouchableOpacity>
+        <Image
+          resizeMode="contain"
+          style={tw`h-full w-20 self-center`}
+          source={require("../Tinder-Logo.png")}
+        />
+      </View>
+      <View style={tw` flex-row`}>
+        <Ionicons
+          name="search"
+          color={"pink"}
+          size={26}
+          style={tw`p-2 pl-4 pr-4`}
+        />
+        <TextInput
+          onChangeText={(setText) => handleSearch(setText)}
+          style={[styles.searchInput, tw`w-full pr-4`]}
+          placeholder="Type a message to search"
+          autoComplete={false}
+          clearButtonMode="always"
+        />
+      </View>
+      <View style={styles.listContain}>
+        <FlatList
+          data={data}
+          keyExtractor={(item) => item.id}
+          renderItem={renderItem}
+          horizontal={true}
+          style={styles.list}
+        />
+      </View>
     </SafeAreaView>
   );
 };
@@ -64,30 +97,25 @@ const Message = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "transparent",
+    backgroundColor: "white",
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   searchInput: {
-    padding: 30,
-    borderColor: "#CCC",
-    borderBottomWidth: 1,
-    borderLeftWidth: 1,
-  },
-  text: {
-    fontSize: 20,
-    color: "#101010",
-    marginTop: 60,
-    fontWeight: "700",
+    padding: 5,
+    borderColor: "pink",
+    borderBottomWidth: 0.6,
   },
   listItem: {
     marginTop: 10,
-    padding: 20,
     alignItems: "center",
+    paddingHorizontal: 2,
     backgroundColor: "#fff",
-    width: "100%",
   },
   listItemText: {
     fontSize: 18,
+  },
+  list: {
+    height: 30,
   },
 });
 
