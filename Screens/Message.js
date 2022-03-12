@@ -17,21 +17,47 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { DataTable } from "react-native-paper";
 
 const AvtItem = ({ title }) => (
-  <View style={styles.listItem}>
-    <Image
-      resizeMode="stretch"
-      style={[tw`h-24 w-16 self-center`, styles.matchAvt]}
-      source={require("../rose.jpg")}
-    />
-    <Text>{title}</Text>
-  </View>
+  <TouchableOpacity>
+    <View style={styles.listItem}>
+      <Image
+        resizeMode="stretch"
+        style={[tw``, styles.matchAvt]}
+        source={require("../rose.jpg")}
+      />
+      <View
+        style={[
+          tw``,
+          { width: 70, alignItems: "center", justifyContent: "center" },
+        ]}
+      >
+        <Text
+          style={[tw`font-bold text-xs`, {}]}
+          numberOfLines={1}
+          ellipsizeMode={"tail"}
+        >
+          {title}
+        </Text>
+      </View>
+    </View>
+  </TouchableOpacity>
 );
 
 const MessItem = ({ title, message }) => (
-  <View style={styles.messItem}>
-    <Text>{title}</Text>
-    <Text>{message}</Text>
-  </View>
+  <TouchableOpacity style={{ marginBottom: 15 }}>
+    <View style={styles.messItem}>
+      <Image
+        resizeMode="cover"
+        style={tw`h-16 w-16 self-center rounded-full`}
+        source={require("../rose.jpg")}
+      />
+      <View style={[tw`ml-2 flex-1 justify-center border-b`, styles.aloalo]}>
+        <Text style={tw`pt-1 font-bold text-base`}>{title}</Text>
+        <Text style={[tw`pb-1`, { color: "rgba(0, 0, 0, 0.7)" }]}>
+          {message}
+        </Text>
+      </View>
+    </View>
+  </TouchableOpacity>
 );
 
 const Message = () => {
@@ -56,6 +82,10 @@ const Message = () => {
     { id: "2", title: "Second", message: "oke em" },
     { id: "3", title: "Third", message: "oke em" },
     { id: "4", title: "Fourth", message: "oke em" },
+    { id: "5", title: "Fourth", message: "oke em" },
+    { id: "6", title: "Fourth", message: "oke em" },
+    { id: "7", title: "Fourth", message: "oke em" },
+    { id: "8", title: "Fourth", message: "oke em" },
   ]);
 
   const [dataOriginall, setOril] = useState([
@@ -63,6 +93,10 @@ const Message = () => {
     { id: "2", title: "Second", message: "oke em" },
     { id: "3", title: "Third", message: "oke em" },
     { id: "4", title: "Fourth", message: "oke em" },
+    { id: "5", title: "Fourth", message: "oke em" },
+    { id: "6", title: "Fourth", message: "oke em" },
+    { id: "7", title: "Fourth", message: "oke em" },
+    { id: "8", title: "Fourth", message: "oke em" },
   ]);
 
   const handleSearch = (text) => {
@@ -118,7 +152,10 @@ const Message = () => {
           clearButtonMode="always"
         />
       </View>
-      <ScrollView style={styles.ScrollViewContainer}>
+      <ScrollView
+        style={styles.ScrollViewContainer}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={tw`font-bold`}>Tương hợp</Text>
         <View style={styles.listContain}>
           <FlatList
@@ -129,7 +166,7 @@ const Message = () => {
             style={styles.list}
           />
         </View>
-        <Text style={tw`font-bold pt-1`}>Tin nhắn</Text>
+        <Text style={tw`font-bold pt-2 pb-4`}>Tin nhắn</Text>
         {dataa.map((item, index) => (
           <View key={index}>
             <MessItem title={item.title} message={item.message} />
@@ -154,7 +191,7 @@ const styles = StyleSheet.create({
   listItem: {
     alignItems: "center",
     flexDirection: "column",
-    paddingEnd: 10,
+    paddingEnd: 15,
   },
   listItemText: {
     fontSize: 18,
@@ -168,11 +205,15 @@ const styles = StyleSheet.create({
   },
   matchAvt: {
     borderRadius: 40,
+    width: 70,
+    height: 90,
   },
   messItem: {
-    alignItems: "center",
     flexDirection: "row",
-    paddingEnd: 10,
+    flex: 1,
+  },
+  aloalo: {
+    borderColor: "rgba(0, 0, 0, 0.1)",
   },
 });
 
