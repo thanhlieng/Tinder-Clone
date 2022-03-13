@@ -8,6 +8,7 @@ import Message from "../Screens/Message";
 import Matched from "../Screens/Matched";
 import Home1 from "../Screens/Home1";
 import Navigation from "../Navigation/Navigation";
+import ModalProfile from "../Screens/ModalProfile";
 
 const BottomNavigationTab = createMaterialBottomTabNavigator();
 
@@ -56,7 +57,7 @@ const BottomNavigation = () => {
       />
       <BottomNavigationTab.Screen
         name="Matched"
-        component={Matched}
+        component={ModalProfile}
         options={{
           tabBarLabel: "Match",
           tabBarIcon: ({ color }) => (
