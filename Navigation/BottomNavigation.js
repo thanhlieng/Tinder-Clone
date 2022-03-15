@@ -9,6 +9,10 @@ import Matched from "../Screens/Matched";
 import Home1 from "../Screens/Home1";
 import Navigation from "../Navigation/Navigation";
 import ModalProfile from "../Screens/ModalProfile";
+import LikedU from "../Screens/LikedU";
+import UserProfile from "../Screens/UserProfile";
+import ProfileSetting from "../Screens/ProfileSetting";
+import Setting from "../Screens/Setting";
 
 const BottomNavigationTab = createMaterialBottomTabNavigator();
 
@@ -47,7 +51,7 @@ const BottomNavigation = () => {
       />
       <BottomNavigationTab.Screen
         name="Home1"
-        component={Home1}
+        component={LikedU}
         options={{
           tabBarLabel: "Home1",
           tabBarIcon: ({ color }) => (
@@ -57,7 +61,7 @@ const BottomNavigation = () => {
       />
       <BottomNavigationTab.Screen
         name="Matched"
-        component={ModalProfile}
+        component={Setting}
         options={{
           tabBarLabel: "Match",
           tabBarIcon: ({ color }) => (
