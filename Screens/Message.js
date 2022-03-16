@@ -10,6 +10,7 @@ import {
   Image,
   Text,
   ScrollView,
+  Pressable,
 } from "react-native";
 import Auth from "../ggAuth/Auth";
 import tw from "tailwind-react-native-classnames";
@@ -120,17 +121,18 @@ const Message = () => {
   const renderItem = ({ item }) => <AvtItem title={item.title} />;
   return (
     <SafeAreaView style={styles.container}>
-      <View style={tw`h-14 flex-row justify-center relative bg-white`}>
-        <TouchableOpacity
-          onPress={Logout}
-          style={tw`absolute left-4 h-11 w-11 justify-center self-center`}
+      <View
+        style={tw`h-14 flex-row justify-center items-center relative bg-white`}
+      >
+        <Pressable
+          style={tw`absolute left-6 h-11 w-11 justify-center self-center`}
         >
           <Image
-            resizeMode="contain"
+            resizeMode="cover"
             source={{ uri: user.photoURL }}
-            style={[tw`w-9 h-9 rounded-full self-center`, styles.profileImage]}
+            style={[tw`w-9 h-9 rounded-full self-center `, styles.profileImage]}
           />
-        </TouchableOpacity>
+        </Pressable>
         <Image
           resizeMode="contain"
           style={tw`h-full w-20 self-center`}

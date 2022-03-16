@@ -83,7 +83,7 @@ const ProfileSetting = () => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <View style={[styles.imageContain, tw`m-2`]}>
+        <View style={[styles.imageContain, tw``]}>
           {data.map((item, index) => (
             <View key={index}>
               <UserImage uri={item.uri} />
@@ -171,7 +171,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "transparent",
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   imageContain: {
     marginTop: 10,

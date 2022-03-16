@@ -13,7 +13,7 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Fontisto from "react-native-vector-icons/Fontisto";
 
-const UserProfile = () => {
+const UserProfile = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.viewContain}>
@@ -26,7 +26,7 @@ const UserProfile = () => {
           <Text style={tw`font-bold text-xl mt-1`}>Hùng, 22</Text>
         </View>
         <View style={styles.buttonContainer}>
-          <Pressable>
+          <Pressable onPress={() => navigation.navigate("profile")}>
             <View style={tw`justify-center items-center`}>
               <FontAwesome
                 name="user-circle-o"
@@ -37,7 +37,7 @@ const UserProfile = () => {
               <Text>Chỉnh sửa hồ sơ</Text>
             </View>
           </Pressable>
-          <Pressable>
+          <Pressable onPress={() => navigation.navigate("setting")}>
             <View style={tw`justify-center items-center`}>
               <AntDesign
                 name="setting"
@@ -64,7 +64,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "transparent",
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   viewContain: {
     height: "80%",
@@ -75,7 +74,7 @@ const styles = StyleSheet.create({
   },
   information: {
     alignItems: "center",
-    marginTop: 90,
+    marginTop: 60,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -85,6 +84,7 @@ const styles = StyleSheet.create({
     shadowRadius: 7.49,
 
     elevation: 10,
+    marginBottom: 20,
   },
   userImage: {
     width: 150,

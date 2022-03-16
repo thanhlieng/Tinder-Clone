@@ -8,8 +8,10 @@ import {
 } from "react-native";
 import React from "react";
 import tw from "tailwind-react-native-classnames";
+import Auth from "../ggAuth/Auth";
 
 const Setting = () => {
+  const { Logout } = Auth();
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.textContainer}>
@@ -22,6 +24,7 @@ const Setting = () => {
       <View style={styles.buttonContainer}>
         <Pressable
           style={tw`justify-center bg-white items-center p-4 rounded-full mb-2`}
+          onPress={Logout}
         >
           <Text style={tw`text-base font-bold text-red-500`}>Đăng xuất</Text>
         </Pressable>
@@ -39,7 +42,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "transparent",
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
   textTitle: {
     color: "#FF1212",

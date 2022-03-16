@@ -8,6 +8,7 @@ import {
   StatusBar,
   Image,
   ImageBackground,
+  Pressable,
 } from "react-native";
 import tw from "tailwind-react-native-classnames";
 import Feather from "react-native-vector-icons/Feather";
@@ -33,7 +34,7 @@ function* range(start, end) {
   }
 }
 
-const Home = () => {
+const Home = ({ navigation }) => {
   const [card, setcard] = useState(range(1, 50));
   const [cardIndex, setcardIndex] = useState(0);
   const { user, Logout } = Auth();
@@ -114,24 +115,26 @@ const Home = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={tw`h-14 flex-row justify-center relative bg-white`}>
-        <TouchableOpacity
-          onPress={Logout}
-          style={tw`absolute left-4 h-11 w-11 justify-center self-center`}
+      <View
+        style={tw`h-14 flex-row justify-center items-center relative bg-white`}
+      >
+        <Pressable
+          onPress={() => navigation.navigate("Userprofile")}
+          style={tw`absolute left-6 h-11 w-11 justify-center self-center`}
         >
           <Image
-            resizeMode="contain"
+            resizeMode="cover"
             source={{ uri: user.photoURL }}
-            style={[tw`w-9 h-9 rounded-full self-center`, styles.profileImage]}
+            style={[tw`w-9 h-9 rounded-full self-center `, styles.profileImage]}
           />
-        </TouchableOpacity>
+        </Pressable>
         <Image
           resizeMode="contain"
           style={tw`h-full w-20 self-center`}
           source={require("../Tinder-Logo.png")}
         />
       </View>
-      <View style={tw`bg-black flex-1`}>
+      <View style={tw`bg-black`}>
         <Swiper
           ref={Swiperef}
           backgroundColor={"#FFFFFF"}
