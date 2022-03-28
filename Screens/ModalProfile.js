@@ -18,8 +18,27 @@ import CircleCheckBox, { LABEL_POSITION } from "react-native-circle-checkbox";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import * as ImagePicker from "expo-image-picker";
+import { db } from "../ggAuth/firebase-con";
+import { setDoc, doc, serverTimestamp } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import Auth from "../ggAuth/Auth";
+import { useNavigation } from "@react-navigation/core";
+import { nanoid } from "nanoid";
+import "react-native-get-random-values";
+
+const fullYear = new Date();
+const picker = [];
+for (
+  let i = fullYear.getFullYear() - 16;
+  i > fullYear.getFullYear() - 16 - 34;
+  i--
+) {
+  picker.push(i);
+}
 
 const ModalProfile = () => {
+  const { user, SigninGoogle1 } = Auth();
+
   const [textout, setTextout] = useState("1232132112");
 
   //Modal nhap thông tin
@@ -31,17 +50,64 @@ const ModalProfile = () => {
 
   //Modal thêm ảnh
   const [modalImageVisible, setModalImageVisible] = useState(false);
-  const [pickerselectedValue, setpickerSelectedValue] = useState("java");
+  const [pickerselectedValue, setpickerSelectedValue] = useState(2006);
   const [imageUri, setImage] = useState();
 
-  const fullYear = new Date();
-  const picker = [];
-  for (
-    let i = fullYear.getFullYear() - 16;
-    i > fullYear.getFullYear() - 16 - 34;
-    i--
-  ) {
-    picker.push(i);
+  const navigation = useNavigation();
+
+  async function uploadImageAsync(uri) {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+    const storage = getStorage();
+    const fileName = nanoid();
+    const imageRef = ref(storage, `${user.uid}/images/${fileName}.jpeg`);
+    const snapshot = await uploadBytes(imageRef, blob, {
+      contentType: "image/jpeg",
+    });
+
+    // We're done with the blob, close and release it
+    blob.close();
+
+    const url = await getDownloadURL(snapshot.ref);
+
+    return url;
+  }
+
+  function addUserdata() {
+    setDoc(doc(db, "userDatas", user.uid), {
+      id: user.uid,
+      userName: textName,
+      sex: !sexCheck,
+      birthYear: pickerselectedValue,
+      description: textDescription,
+      image: [imageUri],
+      timestamp: serverTimestamp(),
+    })
+      .then(() => {
+        console.log("success");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  async function uploaduserData() {
+    const uri = await uploadImageAsync(imageUri);
+
+    setImage(uri);
+    console.log(imageUri);
+    addUserdata();
   }
 
   const pickImage = async () => {
@@ -132,7 +198,7 @@ const ModalProfile = () => {
                   </Text>
                   <Picker
                     selectedValue={pickerselectedValue}
-                    style={{ height: 60, width: 100 }}
+                    style={{ height: 60, width: 110 }}
                     onValueChange={(itemValue, itemIndex) =>
                       setpickerSelectedValue(itemValue)
                     }
@@ -220,10 +286,7 @@ const ModalProfile = () => {
                 <View style={tw`justify-around mb-3 mt-2 flex-row`}>
                   <Pressable
                     onPress={() => {
-                      [
-                        setModalVisible(!modalNameVisible),
-                        setModalImageVisible(!modalImageVisible),
-                      ];
+                      uploaduserData();
                     }}
                   >
                     <SimpleLineIcons

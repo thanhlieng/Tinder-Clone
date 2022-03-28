@@ -9,21 +9,41 @@ import {
   Picker,
   TextInput,
   ScrollView,
+  LogBox,
+  ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
-import React, { useState } from "react";
+LogBox.ignoreAllLogs();
+import React, { useState, useEffect } from "react";
 import tw from "tailwind-react-native-classnames";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import CircleCheckBox, { LABEL_POSITION } from "react-native-circle-checkbox";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "../ggAuth/firebase-con";
+import Auth from "../ggAuth/Auth";
+import { useAsyncEffect } from "use-async-effect";
 
-const UserImage = ({ uri }) => (
+const fullYear = new Date();
+const picker = [];
+for (
+  let i = fullYear.getFullYear() - 16;
+  i > fullYear.getFullYear() - 16 - 34;
+  i--
+) {
+  picker.push(i);
+}
+
+const UserImage = ({ Imageuri }) => (
   <View style={tw`mb-1`}>
     <Pressable style={tw`p-2 justify-end`}>
-      {uri ? (
+      {Imageuri ? (
         <>
           <ImageBackground
             resizeMode="cover"
-            style={[tw``, styles.LikedImage]}
-            source={require("../rose.jpg")}
+            style={[tw`bg-green-500`, styles.LikedImage]}
+            source={{
+              uri: "" + Imageuri,
+            }}
           ></ImageBackground>
           <AntDesign
             name="closecircle"
@@ -53,61 +73,89 @@ const UserImage = ({ uri }) => (
   </View>
 );
 
-const ProfileSetting = () => {
-  const [textName, settextName] = useState("");
-  const [nameError, setnameError] = useState();
-  const [textDescription, settextDescription] = useState();
-  const [sexCheck, setsexCheck] = useState(false);
-
-  const [pickerselectedValue, setpickerSelectedValue] = useState("");
-
-  const fullYear = new Date();
-  const picker = [];
-  for (
-    let i = fullYear.getFullYear() - 16;
-    i > fullYear.getFullYear() - 16 - 34;
-    i--
-  ) {
-    picker.push(i);
+function renderEmpty(a) {
+  var array = [];
+  for (let i = a + 1; i <= 6; i++) {
+    array.push("");
   }
+  return array.map((item, index) => (
+    <View key={index}>
+      <UserImage Imageuri={item[index]} />
+    </View>
+  ));
+}
 
-  const [data, setData] = useState([
-    { id: "1", uri: "First" },
-    { id: "2", uri: "Second" },
-    { id: "3", uri: "Third" },
-    { id: "4", uri: "" },
-    { id: "5", uri: "" },
-    { id: "6", uri: "" },
-  ]);
+const ProfileSetting = () => {
+  const { user, userData } = Auth();
+  const [datas, setDatas] = useState(userData);
+  const [loading, setLoading] = useState(true);
+  const [images, setImages] = useState(userData.image);
+
+  // useEffect(() => {
+  //   async function fetchUser() {
+  //     const snap = await getDoc(doc(db, "userDatas", user.uid));
+  //     setDatas(snap.data());
+  //     setImages(datas.image);
+  //   }
+  //   fetchUser();
+  //   return () => {
+  //     setLoading(false);
+  //     setImages(datas.image);
+  //   };
+  // });
+
+  const updateUserdata = () => {
+    setDoc(doc(db, "userDatas", user.uid), datas, { merge: true })
+      .then(() => {
+        console.log("success");
+      })
+      .catch((err) => {
+        console.log("error");
+      });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-        <View style={[styles.imageContain, tw``]}>
-          {data.map((item, index) => (
-            <View key={index}>
-              <UserImage uri={item.uri} />
-            </View>
-          ))}
-        </View>
+        {!images ? (
+          <ActivityIndicator />
+        ) : (
+          <View style={[styles.imageContain, tw``]}>
+            {datas.image.map((item, index) => (
+              <View key={index}>
+                <UserImage Imageuri={item} />
+              </View>
+            ))}
+            {/* {images.length < 6 ? renderEmpty(images.length) : {}} */}
+          </View>
+        )}
+
         <View style={tw`bg-white m-2 mt-4 rounded-md`}>
           <Text style={styles.textProfile}>Tên của bạn</Text>
           <TextInput
             autoCapitalize={"words"}
             clearButtonMode={"while-editing"}
             keyboardType={"default"}
-            placeholder="Nhập tên của bạn..."
-            value={textName}
-            onChangeText={(newText) => settextName(newText)}
-            onPressOut={() => setnameError()}
+            value={datas.userName}
+            onChangeText={(newText) =>
+              setDatas((prevState) => ({
+                ...prevState,
+                userName: newText,
+              }))
+            }
             style={[tw`rounded-2xl border p-2 mr-5 ml-5`, styles.textInput]}
           ></TextInput>
           <>
             <Text style={[styles.textProfile]}>Giới tính</Text>
             <CircleCheckBox
-              checked={!sexCheck}
+              checked={datas.sex}
               outerColor={"#E0DDDC"}
-              onToggle={() => setsexCheck(!sexCheck)}
+              onToggle={() =>
+                setDatas((prevState) => ({
+                  ...prevState,
+                  sex: !datas.sex,
+                }))
+              }
               labelPosition={LABEL_POSITION.RIGHT}
               label="Nam"
               outerSize={23}
@@ -117,9 +165,14 @@ const ProfileSetting = () => {
               styleCheckboxContainer={tw`ml-5 mb-2`}
             />
             <CircleCheckBox
-              checked={sexCheck}
+              checked={!datas.sex}
               outerColor={"#E0DDDC"}
-              onToggle={() => setsexCheck(!sexCheck)}
+              onToggle={() =>
+                setDatas((prevState) => ({
+                  ...prevState,
+                  sex: !datas.sex,
+                }))
+              }
               labelPosition={LABEL_POSITION.RIGHT}
               label="Nữ"
               outerSize={23}
@@ -131,10 +184,13 @@ const ProfileSetting = () => {
           </>
           <Text style={[styles.textProfile]}>Năm sinh</Text>
           <Picker
-            selectedValue={pickerselectedValue}
+            selectedValue={datas.birthYear}
             style={[{ height: 50, width: "80%" }, tw`ml-5`]}
             onValueChange={(itemValue, itemIndex) =>
-              setpickerSelectedValue(itemValue)
+              setDatas((prevState) => ({
+                ...prevState,
+                birthYear: itemValue,
+              }))
             }
           >
             {picker.map((item, index) => (
@@ -148,19 +204,25 @@ const ProfileSetting = () => {
             textAlignVertical={"top"}
             clearButtonMode={"while-editing"}
             keyboardType={"default"}
-            placeholder="Mô tả bản thân"
-            value={textName}
-            onChangeText={(newText) => settextName(newText)}
-            onPressOut={() => setnameError()}
+            value={datas.description}
+            onChangeText={(newText) =>
+              setDatas((prevState) => ({
+                ...prevState,
+                description: newText,
+              }))
+            }
             style={[tw`rounded-2xl border p-2 mr-5 ml-5`, styles.textInput]}
           />
-          <Pressable style={tw`items-center mb-3 mt-6 ml-32 mr-32`}>
+          <TouchableOpacity
+            style={tw`items-center mb-3 mt-6 ml-32 mr-32`}
+            onPress={() => updateUserdata()}
+          >
             <AntDesign
               name="checkcircleo"
               color="rgba(0,255,0,0.8)"
               size={55}
             />
-          </Pressable>
+          </TouchableOpacity>
         </View>
       </ScrollView>
     </SafeAreaView>

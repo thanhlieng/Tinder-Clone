@@ -12,18 +12,23 @@ import tw from "tailwind-react-native-classnames";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Fontisto from "react-native-vector-icons/Fontisto";
+import Auth from "../ggAuth/Auth";
 
 const UserProfile = ({ navigation }) => {
+  const { userData } = Auth();
+  const fullYear = new Date();
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.viewContain}>
         <View style={styles.information}>
           <Image
-            source={require("../rose.jpg")}
+            source={{ uri: "" + userData.image[0] }}
             resizeMode="cover"
             style={styles.userImage}
           />
-          <Text style={tw`font-bold text-xl mt-1`}>Hùng, 22</Text>
+          <Text style={tw`font-bold text-xl mt-1`}>
+            {userData.userName}, {fullYear.getFullYear() - userData.birthYear}
+          </Text>
         </View>
         <View style={styles.buttonContainer}>
           <Pressable onPress={() => navigation.navigate("profile")}>

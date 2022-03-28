@@ -19,6 +19,7 @@ import { Navigation, NavigationMessage } from "../Navigation/Navigation";
 import { View } from "react-native";
 import Auth from "../ggAuth/Auth";
 import Login from "../Screens/Login";
+import { ScreenStackHeaderLeftView } from "react-native-screens";
 
 const BottomNavigationTab = createMaterialBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -32,24 +33,6 @@ const screenOptionStyle = {
   headerBackTitle: "Back",
   headerTitleAlign: "center",
 };
-
-function FirstNavigation() {
-  return (
-    <View style={{ flex: 1 }} collapsable={false}>
-      <Stack.Navigator
-        screenOptions={screenOptionStyle}
-        initialRouteName="Home"
-      >
-        <Stack.Screen
-          name="Home"
-          component={Home}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen name="User" component={UserProfile} />
-      </Stack.Navigator>
-    </View>
-  );
-}
 
 function BottomTabs() {
   return (
@@ -72,7 +55,7 @@ function BottomTabs() {
       />
       <BottomNavigationTab.Screen
         name="Message"
-        component={NavigationMessage}
+        component={ModalProfile}
         options={{
           tabBarLabel: "Message",
           tabBarIcon: ({ color }) => (
@@ -106,9 +89,14 @@ function BottomTabs() {
   );
 }
 
-function SettingNav() {
+function HomeNav() {
   return (
-    <Stack.Navigator screenOptions={screenOptionStyle} initialRouteName="Home">
+    <Stack.Navigator initialRouteName="Home" screenOptions={screenOptionStyle}>
+      <Stack.Screen
+        name="Home"
+        component={BottomTabs}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="User" component={UserProfile} />
       <Stack.Screen name="profile" component={ProfileSetting} />
       <Stack.Screen name="setting" component={Setting} />
@@ -116,29 +104,36 @@ function SettingNav() {
   );
 }
 
+function LoginNav() {
+  return (
+    <Stack.Navigator
+      screenOptions={{ headerShown: false }}
+      initialRouteName="Login"
+    >
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="Modal" component={ModalProfile} />
+      <Stack.Screen name="Main" component={HomeNav} />
+    </Stack.Navigator>
+  );
+}
+
 const BottomNavigation = () => {
-  const { user } = Auth();
-  const [userData, setuserData] = useState();
+  const { user, userData } = Auth();
 
   return (
-    <Stack.Navigator screenOptions={screenOptionStyle} initialRouteName="Home">
-      {user ? (
+    <Stack.Navigator screenOptions={screenOptionStyle}>
+      {user && userData ? (
         <>
           <Stack.Screen
-            name="Home"
-            component={BottomTabs}
-            options={{ headerShown: false }}
-          />
-          <Stack.Screen
-            name="Userprofile"
-            component={SettingNav}
+            name="Home1"
+            component={HomeNav}
             options={{ headerShown: false }}
           />
         </>
       ) : (
         <Stack.Screen
           name="login"
-          component={Login}
+          component={LoginNav}
           options={{ headerShown: false }}
         />
       )}

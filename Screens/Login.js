@@ -3,15 +3,16 @@ import React, { useLayoutEffect } from "react";
 import Auth from "../ggAuth/Auth";
 import { useNavigation } from "@react-navigation/core";
 import tw from "tailwind-react-native-classnames";
+import navigation from "@react-navigation/native-stack";
 
 const Login = () => {
-  const { SigninGoogle } = Auth();
+  const { SigninGoogle, userData, user, Loading } = Auth();
   const navigation = useNavigation();
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerShown: false,
-    });
-  }, []);
+  const Signin = () => {
+    if (!Loading && user && !userData) {
+      () => navigation.navigate("Modal");
+    }
+  };
 
   return (
     <View style={tw`flex-1`}>
@@ -30,6 +31,9 @@ const Login = () => {
           <Text style={tw`font-semibold text-center text-pink-500`}>
             Signin with Google
           </Text>
+          {!Loading && user && !userData
+            ? () => navigation.navigate("Modal")
+            : console.log("oke em")}
         </TouchableOpacity>
       </ImageBackground>
     </View>

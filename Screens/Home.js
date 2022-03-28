@@ -37,7 +37,7 @@ function* range(start, end) {
 const Home = ({ navigation }) => {
   const [card, setcard] = useState(range(1, 50));
   const [cardIndex, setcardIndex] = useState(0);
-  const { user, Logout } = Auth();
+  const { user, Logout, userData } = Auth();
   const pressedRed = useSharedValue(false);
   const pressedGreen = useSharedValue(false);
   const Swiperef = useRef(null);
@@ -119,12 +119,12 @@ const Home = ({ navigation }) => {
         style={tw`h-14 flex-row justify-center items-center relative bg-white`}
       >
         <Pressable
-          onPress={() => navigation.navigate("Userprofile")}
+          onPress={() => navigation.navigate("User")}
           style={tw`absolute left-6 h-11 w-11 justify-center self-center`}
         >
           <Image
             resizeMode="cover"
-            source={{ uri: user.photoURL }}
+            source={{ uri: "" + userData.image[0] }}
             style={[tw`w-9 h-9 rounded-full self-center `, styles.profileImage]}
           />
         </Pressable>

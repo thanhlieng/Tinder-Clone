@@ -12,7 +12,8 @@ import {
   onAuthStateChanged,
   signOut,
 } from "firebase/auth";
-import { auth } from "../ggAuth/firebase-con";
+import { auth, db } from "../ggAuth/firebase-con";
+import { doc, getDoc } from "firebase/firestore";
 
 const AuthContext = createContext({});
 
@@ -30,19 +31,38 @@ export const ContextProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loadingIndicator, setLoadingIndicator] = useState(true);
   const [Loading, setLoading] = useState(false);
+  const [userData, setData] = useState(null);
 
-  useEffect(
-    () =>
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          setUser(user);
-        } else {
-          setUser(null);
-        }
-        setLoadingIndicator(false);
-      }),
-    []
-  );
+  useEffect(() => {
+    async function fetchUser() {
+      const snap = await getDoc(doc(db, "userDatas", user.uid));
+      setData(snap.data());
+    }
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+        fetchUser();
+      } else {
+        setUser(null);
+      }
+      setLoadingIndicator(false);
+    });
+  }, [user]);
+
+  // if (user) {
+  //   useEffect(() => {
+  //     async function fetchUser() {
+  //       const snap = await getDoc(doc(db, "userDatas", user.uid));
+  //       setData(snap.data());
+  //     }
+  //     fetchUser();
+  //   }, []);
+  // }
+
+  const SigninGoogle1 = async () => {
+    const snap = await getDoc(doc(db, "userDatas", user.uid));
+    setData(snap.data());
+  };
 
   const SigninGoogle = async () => {
     setLoading(true);
@@ -65,14 +85,24 @@ export const ContextProvider = ({ children }) => {
 
   const Logout = () => {
     setLoading(true);
+    setData(null);
+    setUser(null);
     signOut(auth)
       .catch((error) => setError(error))
       .finally(() => setLoading(false));
   };
 
   const memoValue = useMemo(
-    () => ({ user, error, Loading, Logout, SigninGoogle }),
-    [user, Loading, error]
+    () => ({
+      user,
+      error,
+      Loading,
+      Logout,
+      SigninGoogle,
+      SigninGoogle1,
+      userData,
+    }),
+    [user, Loading, error, userData]
   );
 
   return (
