@@ -12,6 +12,7 @@ import {
   TextInput,
   Picker,
   Image,
+  TouchableOpacity,
 } from "react-native";
 import tw from "tailwind-react-native-classnames";
 import CircleCheckBox, { LABEL_POSITION } from "react-native-circle-checkbox";
@@ -19,7 +20,7 @@ import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import * as ImagePicker from "expo-image-picker";
 import { db } from "../ggAuth/firebase-con";
-import { setDoc, doc, serverTimestamp } from "firebase/firestore";
+import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Auth from "../ggAuth/Auth";
 import { useNavigation } from "@react-navigation/core";
@@ -37,7 +38,8 @@ for (
 }
 
 const ModalProfile = () => {
-  const { user, SigninGoogle1 } = Auth();
+  const { user, SigninGoogle1, setUserData, userData, setData } = Auth();
+  // const [userData, setData] = Auth();
 
   const [textout, setTextout] = useState("1232132112");
 
@@ -52,6 +54,8 @@ const ModalProfile = () => {
   const [modalImageVisible, setModalImageVisible] = useState(false);
   const [pickerselectedValue, setpickerSelectedValue] = useState(2006);
   const [imageUri, setImage] = useState();
+  const [dataAfter, setAfter] = useState();
+  const [okeModal, setOkmodal] = useState(false);
 
   const navigation = useNavigation();
 
@@ -84,14 +88,14 @@ const ModalProfile = () => {
     return url;
   }
 
-  function addUserdata() {
+  function addUserdata(uri) {
     setDoc(doc(db, "userDatas", user.uid), {
       id: user.uid,
       userName: textName,
       sex: !sexCheck,
       birthYear: pickerselectedValue,
       description: textDescription,
-      image: [imageUri],
+      image: [uri],
       timestamp: serverTimestamp(),
     })
       .then(() => {
@@ -104,10 +108,10 @@ const ModalProfile = () => {
 
   async function uploaduserData() {
     const uri = await uploadImageAsync(imageUri);
-
-    setImage(uri);
-    console.log(imageUri);
-    addUserdata();
+    addUserdata(uri);
+    const snap = await getDoc(doc(db, "userDatas", user.uid));
+    setAfter(snap.data());
+    setOkmodal(true);
   }
 
   const pickImage = async () => {
@@ -310,6 +314,45 @@ const ModalProfile = () => {
                     />
                   </Pressable>
                 </View>
+              </View>
+            </View>
+          </Modal>
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={okeModal}
+            onRequestClose={() => {
+              setOkmodal(!okeModal);
+            }}
+          >
+            <View
+              style={[
+                styles.centeredView,
+                tw`items-center`,
+                { backgroundColor: "rgba(0,0,0,0.5)" },
+              ]}
+            >
+              <View
+                style={[
+                  tw`justify-center bg-white items-center space-around`,
+                  {
+                    marginHorizontal: "5%",
+                    paddingVertical: "5%",
+                    paddingHorizontal: "5%",
+                  },
+                ]}
+              >
+                <Text style={tw`border-b w-fit mb-2`}>
+                  Chung mung ban da thiet lap xong ho so
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setUserData(dataAfter);
+                  }}
+                  style={[tw`w-full`, { width: "100%" }]}
+                >
+                  <Text style={{ color: "red" }}>Ok!</Text>
+                </TouchableOpacity>
               </View>
             </View>
           </Modal>

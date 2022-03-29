@@ -92,6 +92,10 @@ export const ContextProvider = ({ children }) => {
       .finally(() => setLoading(false));
   };
 
+  const setUserData = (data) => {
+    setData(data);
+  };
+
   const memoValue = useMemo(
     () => ({
       user,
@@ -101,6 +105,7 @@ export const ContextProvider = ({ children }) => {
       SigninGoogle,
       SigninGoogle1,
       userData,
+      setUserData,
     }),
     [user, Loading, error, userData]
   );

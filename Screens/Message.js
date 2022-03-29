@@ -62,7 +62,7 @@ const MessItem = ({ title, message }) => (
 );
 
 const Message = () => {
-  const { user, Logout } = Auth();
+  const { user, Logout, userData } = Auth();
   const [text, setText] = useState("");
   const [data, setData] = useState([
     { id: "1", title: "First" },
@@ -129,7 +129,7 @@ const Message = () => {
         >
           <Image
             resizeMode="cover"
-            source={{ uri: user.photoURL }}
+            source={{ uri: "" + userData.image[0] }}
             style={[tw`w-9 h-9 rounded-full self-center `, styles.profileImage]}
           />
         </Pressable>

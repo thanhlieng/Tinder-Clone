@@ -122,13 +122,21 @@ const BottomNavigation = () => {
 
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
-      {user && userData ? (
+      {user ? (
         <>
-          <Stack.Screen
-            name="Home1"
-            component={HomeNav}
-            options={{ headerShown: false }}
-          />
+          {userData ? (
+            <Stack.Screen
+              name="Home1"
+              component={HomeNav}
+              options={{ headerShown: false }}
+            />
+          ) : (
+            <Stack.Screen
+              name="Modal"
+              component={ModalProfile}
+              options={{ headerShown: false }}
+            />
+          )}
         </>
       ) : (
         <Stack.Screen

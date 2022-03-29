@@ -31,9 +31,6 @@ const Login = () => {
           <Text style={tw`font-semibold text-center text-pink-500`}>
             Signin with Google
           </Text>
-          {!Loading && user && !userData
-            ? () => navigation.navigate("Modal")
-            : console.log("oke em")}
         </TouchableOpacity>
       </ImageBackground>
     </View>
