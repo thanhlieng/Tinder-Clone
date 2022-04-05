@@ -36,26 +36,24 @@ const screenOptionStyle = {
 
 function BottomTabs() {
   return (
-    <BottomNavigationTab.Navigator
+    <Tab.Navigator
       activeColor="#FF565B"
       inactiveColor="#C7C7C7"
       shifting={false}
-      barStyle={{ backgroundColor: "#FFFFFF" }}
+      barStyle={{ backgroundColor: "#FFFFFF", height: 80 }}
+      labeled={false}
+      initialRouteName="MainHome"
+      screenOptions={{
+        headerShown: false,
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: "pink",
+        tabBarHideOnKeyboard: true,
+        tabBarStyle: { position: "absolute" },
+      }}
     >
-      <BottomNavigationTab.Screen
-        name="MainHome"
-        component={Home}
-        options={({ route }) => ({
-          tabBarLabel: "Home",
-          tabBarIcon: ({ color }) => (
-            <Fontisto name="tinder" color={color} size={24} />
-          ),
-          tabBarVisible: false,
-        })}
-      />
-      <BottomNavigationTab.Screen
-        name="Message"
-        component={ModalProfile}
+      {/* <BottomNavigationTab.Screen
+        name="Message12121"
+        component={vipsel}
         options={{
           tabBarLabel: "Message",
           tabBarIcon: ({ color }) => (
@@ -64,8 +62,8 @@ function BottomTabs() {
           headerShown: true,
           headerTitle: "Message",
         }}
-      />
-      <BottomNavigationTab.Screen
+      /> */}
+      <Tab.Screen
         name="Home1"
         component={Navigation}
         options={{
@@ -75,7 +73,17 @@ function BottomTabs() {
           ),
         }}
       />
-      <BottomNavigationTab.Screen
+      <Tab.Screen
+        name="MainHome"
+        component={Home}
+        options={({ route }) => ({
+          tabBarLabel: "Home",
+          tabBarIcon: ({ color }) => (
+            <Fontisto name="tinder" color={color} size={30} />
+          ),
+        })}
+      />
+      <Tab.Screen
         name="Matched"
         component={Message}
         options={{
@@ -85,7 +93,7 @@ function BottomTabs() {
           ),
         }}
       />
-    </BottomNavigationTab.Navigator>
+    </Tab.Navigator>
   );
 }
 

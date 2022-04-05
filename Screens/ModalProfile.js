@@ -21,7 +21,13 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import * as ImagePicker from "expo-image-picker";
 import { db } from "../ggAuth/firebase-con";
 import { setDoc, doc, serverTimestamp, getDoc } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  getStorage,
+  ref as storageRef,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
+import { getDatabase, set, ref as databaseRef } from "firebase/database";
 import Auth from "../ggAuth/Auth";
 import { useNavigation } from "@react-navigation/core";
 import { nanoid } from "nanoid";
@@ -75,7 +81,7 @@ const ModalProfile = () => {
     });
     const storage = getStorage();
     const fileName = nanoid();
-    const imageRef = ref(storage, `${user.uid}/images/${fileName}.jpeg`);
+    const imageRef = storageRef(storage, `${user.uid}/images/${fileName}.jpeg`);
     const snapshot = await uploadBytes(imageRef, blob, {
       contentType: "image/jpeg",
     });
@@ -106,8 +112,15 @@ const ModalProfile = () => {
       });
   }
 
+  function addUserdataRealtime() {
+    const database = getDatabase();
+    set(databaseRef(database, "liked/" + user.uid), { user: user.uid });
+    console.log("oke");
+  }
+
   async function uploaduserData() {
     const uri = await uploadImageAsync(imageUri);
+    addUserdataRealtime();
     addUserdata(uri);
     const snap = await getDoc(doc(db, "userDatas", user.uid));
     setAfter(snap.data());

@@ -2,6 +2,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getDatabase } from "firebase/database";
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -12,6 +14,8 @@ const firebaseConfig = {
   projectId: "rn-app-59deb",
   storageBucket: "rn-app-59deb.appspot.com",
   messagingSenderId: "1073837368078",
+  databaseURL:
+    "https://rn-app-59deb-default-rtdb.asia-southeast1.firebasedatabase.app",
   appId: "1:1073837368078:web:b4eb3dd041fa6c110c6d5f",
 };
 
@@ -19,5 +23,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
+const database = getDatabase();
 
-export { auth, db };
+export { auth, db, database };

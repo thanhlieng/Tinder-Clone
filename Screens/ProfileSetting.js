@@ -86,7 +86,7 @@ function renderEmpty(a) {
 }
 
 const ProfileSetting = () => {
-  const { user, userData } = Auth();
+  const { user, userData, setUserData } = Auth();
   const [datas, setDatas] = useState(userData);
   const [loading, setLoading] = useState(true);
   const [images, setImages] = useState(userData.image);
@@ -215,7 +215,9 @@ const ProfileSetting = () => {
           />
           <TouchableOpacity
             style={tw`items-center mb-3 mt-6 ml-32 mr-32`}
-            onPress={() => updateUserdata()}
+            onPress={() => {
+              updateUserdata(), setUserData(datas);
+            }}
           >
             <AntDesign
               name="checkcircleo"
