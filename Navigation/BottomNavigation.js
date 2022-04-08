@@ -20,6 +20,7 @@ import { View } from "react-native";
 import Auth from "../ggAuth/Auth";
 import Login from "../Screens/Login";
 import { ScreenStackHeaderLeftView } from "react-native-screens";
+import { useWindowDimensions } from "react-native";
 
 const BottomNavigationTab = createMaterialBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -35,12 +36,13 @@ const screenOptionStyle = {
 };
 
 function BottomTabs() {
+  const { height, width } = useWindowDimensions();
   return (
     <Tab.Navigator
       activeColor="#FF565B"
       inactiveColor="#C7C7C7"
       shifting={false}
-      barStyle={{ backgroundColor: "#FFFFFF", height: 80 }}
+      barStyle={{ backgroundColor: "#60EBB3", height: height * 0.5 }}
       labeled={false}
       initialRouteName="MainHome"
       screenOptions={{
@@ -48,7 +50,7 @@ function BottomTabs() {
         tabBarShowLabel: false,
         tabBarActiveTintColor: "pink",
         tabBarHideOnKeyboard: true,
-        tabBarStyle: { position: "absolute" },
+        tabBarStyle: { height: height * 0.065, position: "absolute" },
       }}
     >
       {/* <BottomNavigationTab.Screen

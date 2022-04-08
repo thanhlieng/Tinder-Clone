@@ -9,6 +9,7 @@ import {
   Image,
   ImageBackground,
   Pressable,
+  useWindowDimensions,
   ActivityIndicator,
 } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -37,6 +38,15 @@ import {
   onSnapshot,
   doc,
 } from "firebase/firestore";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  update,
+  get,
+  child,
+} from "firebase/database";
+
 import { auth, db } from "../ggAuth/firebase-con";
 import { async } from "@firebase/util";
 
@@ -48,7 +58,7 @@ function* range(start, end) {
 }
 
 const Home = ({ navigation }) => {
-  const [card, setcard] = useState(range(1, 50));
+  const { height, width } = useWindowDimensions();
   const [cardIndex, setcardIndex] = useState(0);
   const { user, Logout, userData } = Auth();
   const pressedRed = useSharedValue(false);
@@ -68,6 +78,9 @@ const Home = ({ navigation }) => {
     const { x, y, height, width } = event.nativeEvent.layout;
     setcarouselHeight(height);
   };
+
+  let Likeddata = [];
+
   const fullYear = new Date();
   const tabBarHeight = useBottomTabBarHeight();
   console.log(tabBarHeight);
@@ -124,14 +137,43 @@ const Home = ({ navigation }) => {
     return sub;
   }, []);
 
-  console.log(allData);
+  const addLikeduser = (userId) => {
+    const dbb = getDatabase();
+    let userLikedData = [];
+    get(ref(dbb, `liked/${userId}`))
+      .then((snapshot) => {
+        console.log(snapshot.val());
+        userLikedData = snapshot.val();
+        const updates = {};
+        if (!userLikedData.includes(user.uid)) {
+          userLikedData.push(user.uid);
+          updates[`liked/${userId}`] = userLikedData;
+          return update(ref(realtime), updates);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+    // const updates = {};
+    // if (!userLikedData.includes("thanh")) {
+    //   console.log(userLikedData);
+    //   userLikedData.push("jkoi123");
+    //   updates["liked/THANH"] = userLikedData;
+    // }
+    // userLikedData.push("VCoin");
+    // console.log("&1" + userLikedData);
+  };
+
+  const realtime = getDatabase();
+  const starCountRef = ref(realtime, "liked/THANH");
+  onValue(starCountRef, (snapshot) => {
+    const data = snapshot.val();
+    Likeddata = data;
+  });
 
   const renderImage = ({ item, index }) => {
     return (
-      <View
-        key={index}
-        style={[styles.card, { paddingBottom: tabBarHeight + 6 }]}
-      >
+      <View key={index} style={{ height: height * 0.85 }}>
         <ImageBackground
           source={{ uri: "" + item }}
           style={tw`top-0 h-full w-full rounded-full`}
@@ -156,13 +198,13 @@ const Home = ({ navigation }) => {
 
   const renderCard = (card, index) => {
     return (
-      <View style={[styles.card, { marginBottom: tabBarHeight }]} key={index}>
+      <View style={[styles.card, { height: height * 0.85 }]} key={index}>
         <Carousel
           layout="tinder"
           ref={Carouselref}
           data={allData[index].image}
-          sliderWidth={carouselWidth}
-          itemWidth={carouselWidth}
+          sliderWidth={width * 0.95}
+          itemWidth={width * 0.95}
           renderItem={renderImage}
           inactiveSlideShift={0}
           useScrollView={true}
@@ -198,7 +240,7 @@ const Home = ({ navigation }) => {
           activeDotIndex={dotindex}
           dotsLength={imagedata.length}
         />
-        <View style={[tw`absolute bottom-0 w-full`, { height: "25%" }]}>
+        <View style={[tw`absolute bottom-0 w-full`, { height: "20%" }]}>
           <Text style={tw`font-bold text-lg ml-5 text-white`}>
             {allData[index].userName}{" "}
             {fullYear.getFullYear() - allData[index].birthYear}
@@ -251,7 +293,10 @@ const Home = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View
         onLayout={layoutA}
-        style={tw`h-14 flex-row justify-center items-center relative bg-white`}
+        style={[
+          tw`flex-row justify-center items-center relative bg-white w-full absolute top-0`,
+          { height: height * 0.055 },
+        ]}
       >
         <Pressable
           onPress={() => navigation.navigate("User")}
@@ -260,20 +305,20 @@ const Home = ({ navigation }) => {
           <Image
             resizeMode="cover"
             source={{ uri: "" + userData.image[0] }}
-            style={[tw`w-9 h-9 rounded-full self-center `, styles.profileImage]}
+            style={[
+              tw` rounded-full self-center `,
+              { height: height * 0.04, width: height * 0.04 },
+            ]}
           />
         </Pressable>
         <Image
           resizeMode="contain"
-          style={tw`h-full w-20 self-center`}
+          style={[tw`h-full self-center`, { width: "50%" }]}
           source={require("../Tinder-Logo.png")}
         />
       </View>
       {loading ? (
-        <View
-          style={[styles.card, { marginHorizontal: 15 }]}
-          onLayout={onLayout}
-        >
+        <View style={[styles.card]} onLayout={onLayout}>
           <Carousel
             layout="tinder"
             ref={Carouselref}
@@ -289,7 +334,7 @@ const Home = ({ navigation }) => {
           />
         </View>
       ) : (
-        <View style={[tw`flex-1`, { marginBottom: tabBarHeight }]}>
+        <View style={[tw`bg-red-500`, { height: height * 0.85 }]}>
           <Swiper
             ref={Swiperef}
             backgroundColor={"#F2F2F2"}
@@ -297,8 +342,8 @@ const Home = ({ navigation }) => {
             cardIndex={0}
             renderCard={renderCard}
             verticalSwipe={false}
-            cardVerticalMargin={15}
-            cardHorizontalMargin={15}
+            cardVerticalMargin={0}
+            cardHorizontalMargin={width * 0.025}
             overlayLabels={{
               left: {
                 title: "NOPE",
@@ -339,72 +384,76 @@ const Home = ({ navigation }) => {
             }}
             animateOverlayLabelsOpacity
             animateCardOpacity
-          ></Swiper>
-          <GestureHandlerRootView
-            style={[
-              tw`absolute h-20 flex-row justify-around w-full`,
-              { bottom: 15 },
-            ]}
+            childrenOnTop={true}
+            onSwipedRight={(cardIndex) => {
+              () => addLikeduser(allData[cardIndex].id);
+            }}
           >
-            <TapGestureHandler onGestureEvent={lefteventHandler}>
-              <Animated.View
-                style={[
-                  tw`rounded-full bg-white w-12 h-12 self-end`,
-                  leftTouchAnimation,
-                ]}
-              >
-                <TouchableWithoutFeedback
-                  onPress={() => Swiperef.current.swipeLeft()}
-                  style={tw`w-12 h-12 justify-center rounded-full border-red-500 border-2 bg-transparent`}
+            <GestureHandlerRootView
+              style={tw`absolute bottom-0 flex-row justify-around w-full`}
+            >
+              <TapGestureHandler onGestureEvent={lefteventHandler}>
+                <Animated.View
+                  style={[
+                    tw`rounded-full bg-white w-12 h-12 self-end`,
+                    leftTouchAnimation,
+                  ]}
                 >
-                  <Ionicons
-                    style={tw`self-center`}
-                    name="md-close"
-                    color={"red"}
-                    size={40}
-                  />
-                </TouchableWithoutFeedback>
-              </Animated.View>
-            </TapGestureHandler>
-            <TapGestureHandler onGestureEvent={righteventHandler}>
-              <Animated.View
-                style={[
-                  tw`rounded-full bg-transparent w-12 h-12 self-end`,
-                  rightTouchAnimation,
-                ]}
-              >
-                <TouchableWithoutFeedback
-                  onPress={() => Swiperef.current.swipeRight()}
-                  style={tw`w-12 h-12 justify-center rounded-full border-green-500 border-2 bg-transparent`}
+                  <TouchableWithoutFeedback
+                    onPress={() => Swiperef.current.swipeLeft()}
+                    style={tw`w-12 h-12 justify-center rounded-full border-red-500 border-2 bg-transparent`}
+                  >
+                    <Ionicons
+                      style={tw`self-center`}
+                      name="md-close"
+                      color={"red"}
+                      size={40}
+                    />
+                  </TouchableWithoutFeedback>
+                </Animated.View>
+              </TapGestureHandler>
+              <TapGestureHandler onGestureEvent={righteventHandler}>
+                <Animated.View
+                  style={[
+                    tw`rounded-full bg-transparent w-12 h-12 self-end`,
+                    rightTouchAnimation,
+                  ]}
                 >
-                  <Ionicons
-                    style={tw`self-center `}
-                    name="heart"
-                    color={"green"}
-                    size={40}
-                  />
-                </TouchableWithoutFeedback>
-              </Animated.View>
-            </TapGestureHandler>
-          </GestureHandlerRootView>
+                  <TouchableWithoutFeedback
+                    onPress={() => {
+                      Swiperef.current.swipeRight(), addLikeduser();
+                    }}
+                    style={tw`w-12 h-12 justify-center rounded-full border-green-500 border-2 bg-transparent`}
+                  >
+                    <Ionicons
+                      style={tw`self-center `}
+                      name="heart"
+                      color={"green"}
+                      size={40}
+                    />
+                  </TouchableWithoutFeedback>
+                </Animated.View>
+              </TapGestureHandler>
+            </GestureHandlerRootView>
+          </Swiper>
         </View>
       )}
     </SafeAreaView>
   );
 };
 
-export default Home;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "transparent",
-    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    justifyContent: "center",
+    alignContent: "center",
   },
   card: {
     borderColor: "#E8E8E8",
     justifyContent: "center",
-    backgroundColor: "transparent",
+    backgroundColor: "green",
   },
   text: {
     textAlign: "center",
@@ -412,3 +461,5 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
 });
+
+export default Home;
