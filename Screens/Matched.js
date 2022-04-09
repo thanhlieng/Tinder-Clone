@@ -7,48 +7,79 @@ import {
   ImageBackground,
   Image,
   TouchableOpacity,
+  useWindowDimensions,
+  ActivityIndicator,
 } from "react-native";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import tw from "tailwind-react-native-classnames";
 import Auth from "../ggAuth/Auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../ggAuth/firebase-con";
 
-const Matched = () => {
-  const { user } = Auth();
+const Matched = ({ route, navigation: { goBack } }) => {
+  const { user, userData } = Auth();
+  const { matchId } = route.params;
+  const { height, width } = useWindowDimensions();
+  const [matchData, setmatchData] = useState();
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    async function fetchUser() {
+      const snap = await getDoc(doc(db, "userDatas", matchId));
+      setmatchData(snap.data());
+      setLoading(false);
+    }
+    fetchUser();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ImageBackground
-        source={{ uri: "https://tinder.com/static/tinder.png" }}
-        resizeMode="cover"
-        style={tw`flex-1`}
-      >
-        <View style={styles.textMatch}>
-          <Text style={tw`text-green-600 text-4xl pb-2`}>It's a Matched</Text>
-          <Text style={tw`text-green-600 text-xl pt-2`}>
-            You guys have like each other
-          </Text>
-        </View>
-        <View style={styles.imageMatch}>
-          <Image
-            source={{ uri: user.photoURL }}
-            style={[tw`w-32 h-32`, styles.matchImage]}
-          ></Image>
-          <Image
-            style={[tw`w-32 h-32`, styles.matchImage]}
-            source={{ uri: user.photoURL }}
-          ></Image>
-        </View>
-        <View style={styles.buttonMatch}>
-          <TouchableOpacity>
-            <Text style={tw`text-white text-lg`}>Keep Swipping</Text>
-          </TouchableOpacity>
-          <TouchableOpacity>
-            <Text style={tw`text-white pt-10 text-lg`}>
-              Send message imidiately
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </ImageBackground>
+      {loading ? (
+        <ActivityIndicator size="large" />
+      ) : (
+        <ImageBackground
+          source={{ uri: matchData.image[0] }}
+          resizeMode="cover"
+          style={tw`flex-1`}
+          // imageStyle={{ opacity: 0.3 }}
+        >
+          <View style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+            <View style={styles.textMatch}>
+              <Text style={tw`text-green-500 text-4xl pb-2`}>
+                It's a Matched
+              </Text>
+              <Text style={tw`text-green-500 text-xl pt-2`}>
+                You guys have like each other
+              </Text>
+            </View>
+            <View style={styles.imageMatch}>
+              <Image
+                source={{ uri: userData.image[0] }}
+                style={[
+                  { width: width * 0.35, height: width * 0.35 },
+                  styles.matchImage,
+                ]}
+              ></Image>
+              <Image
+                style={[
+                  { width: width * 0.35, height: width * 0.35 },
+                  styles.matchImage,
+                ]}
+                source={{ uri: matchData.image[0] }}
+              ></Image>
+            </View>
+            <View style={styles.buttonMatch}>
+              <TouchableOpacity onPress={() => goBack()}>
+                <Text style={tw`text-white text-lg`}>Keep Swipping</Text>
+              </TouchableOpacity>
+              <TouchableOpacity>
+                <Text style={tw`text-white pt-10 text-lg`}>
+                  Send message imidiately
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ImageBackground>
+      )}
     </SafeAreaView>
   );
 };
@@ -72,11 +103,11 @@ const styles = StyleSheet.create({
   },
   buttonMatch: {
     alignItems: "center",
-    marginVertical: "25%",
+    marginVertical: "35%",
   },
   matchImage: {
     borderRadius: 99999,
     borderWidth: 5,
-    borderColor: "white",
+    borderColor: "pink",
   },
 });

@@ -50,7 +50,7 @@ function BottomTabs() {
         tabBarShowLabel: false,
         tabBarActiveTintColor: "pink",
         tabBarHideOnKeyboard: true,
-        tabBarStyle: { height: height * 0.065, position: "absolute" },
+        tabBarStyle: { height: height * 0.055, position: "absolute" },
       }}
     >
       {/* <BottomNavigationTab.Screen
@@ -66,10 +66,10 @@ function BottomTabs() {
         }}
       /> */}
       <Tab.Screen
-        name="Home1"
-        component={Navigation}
+        name="LikeU"
+        component={LikedU}
         options={{
-          tabBarLabel: "Home1",
+          tabBarLabel: "LikeU",
           tabBarIcon: ({ color }) => (
             <Ionicons name="heart" color={color} size={26} />
           ),
@@ -107,6 +107,7 @@ function HomeNav() {
         component={BottomTabs}
         options={{ headerShown: false }}
       />
+      <Stack.Screen name="match" component={Matched} />
       <Stack.Screen name="User" component={UserProfile} />
       <Stack.Screen name="profile" component={ProfileSetting} />
       <Stack.Screen name="setting" component={Setting} />

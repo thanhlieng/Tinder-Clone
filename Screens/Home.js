@@ -143,12 +143,15 @@ const Home = ({ navigation }) => {
     get(ref(dbb, `liked/${userId}`))
       .then((snapshot) => {
         console.log(snapshot.val());
+        console.log(Likeddata);
         userLikedData = snapshot.val();
         const updates = {};
-        if (!userLikedData.includes(user.uid)) {
+        if (!Likeddata.includes(userId)) {
           userLikedData.push(user.uid);
           updates[`liked/${userId}`] = userLikedData;
           return update(ref(realtime), updates);
+        } else {
+          navtoMatch(userId);
         }
       })
       .catch((error) => {
@@ -165,11 +168,17 @@ const Home = ({ navigation }) => {
   };
 
   const realtime = getDatabase();
-  const starCountRef = ref(realtime, "liked/THANH");
+  const starCountRef = ref(realtime, `liked/${user.uid}`);
   onValue(starCountRef, (snapshot) => {
     const data = snapshot.val();
     Likeddata = data;
   });
+
+  const navtoMatch = (Id2) => {
+    navigation.navigate("match", {
+      matchId: Id2,
+    });
+  };
 
   const renderImage = ({ item, index }) => {
     return (
@@ -292,7 +301,6 @@ const Home = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View
-        onLayout={layoutA}
         style={[
           tw`flex-row justify-center items-center relative bg-white w-full absolute top-0`,
           { height: height * 0.055 },
@@ -386,7 +394,7 @@ const Home = ({ navigation }) => {
             animateCardOpacity
             childrenOnTop={true}
             onSwipedRight={(cardIndex) => {
-              () => addLikeduser(allData[cardIndex].id);
+              addLikeduser(allData[cardIndex].id);
             }}
           >
             <GestureHandlerRootView
@@ -421,7 +429,7 @@ const Home = ({ navigation }) => {
                 >
                   <TouchableWithoutFeedback
                     onPress={() => {
-                      Swiperef.current.swipeRight(), addLikeduser();
+                      Swiperef.current.swipeRight();
                     }}
                     style={tw`w-12 h-12 justify-center rounded-full border-green-500 border-2 bg-transparent`}
                   >

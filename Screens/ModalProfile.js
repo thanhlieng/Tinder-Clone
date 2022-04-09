@@ -114,7 +114,7 @@ const ModalProfile = () => {
 
   function addUserdataRealtime() {
     const database = getDatabase();
-    set(databaseRef(database, "liked/" + user.uid), user.uid);
+    set(databaseRef(database, "liked/" + user.uid), [user.uid]);
     console.log("oke");
   }
 
