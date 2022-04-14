@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -11,58 +11,104 @@ import {
   Text,
   ScrollView,
   Pressable,
+  useWindowDimensions,
 } from "react-native";
 import Auth from "../ggAuth/Auth";
 import tw from "tailwind-react-native-classnames";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { DataTable } from "react-native-paper";
-
-const AvtItem = ({ title }) => (
-  <TouchableOpacity>
-    <View style={styles.listItem}>
-      <Image
-        resizeMode="stretch"
-        style={[tw``, styles.matchAvt]}
-        source={require("../rose.jpg")}
-      />
-      <View
-        style={[
-          tw``,
-          { width: 70, alignItems: "center", justifyContent: "center" },
-        ]}
-      >
-        <Text
-          style={[tw`font-bold text-xs`, {}]}
-          numberOfLines={1}
-          ellipsizeMode={"tail"}
-        >
-          {title}
-        </Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
-
-const MessItem = ({ title, message }) => (
-  <TouchableOpacity style={{ marginBottom: 15 }}>
-    <View style={styles.messItem}>
-      <Image
-        resizeMode="cover"
-        style={tw`h-16 w-16 self-center rounded-full`}
-        source={require("../rose.jpg")}
-      />
-      <View style={[tw`ml-2 flex-1 justify-center border-b`, styles.aloalo]}>
-        <Text style={tw`pt-1 font-bold text-base`}>{title}</Text>
-        <Text style={[tw`pb-1`, { color: "rgba(0, 0, 0, 0.7)" }]}>
-          {message}
-        </Text>
-      </View>
-    </View>
-  </TouchableOpacity>
-);
+import {
+  getDatabase,
+  ref,
+  onValue,
+  update,
+  get,
+  child,
+} from "firebase/database";
+import { db } from "../ggAuth/firebase-con";
+import { doc, getDoc } from "firebase/firestore";
 
 const Message = () => {
+  const { width, height } = useWindowDimensions();
   const { user, Logout, userData } = Auth();
+  const { loading, setLoading } = useState(true);
+  const { dataFetch, dataset } = useState();
+  let Matchdata = [];
+
+  // useEffect(() => {
+  //   () => dataset(Matchdata);
+  //   () => setLoading(false);
+  // }, [Matchdata]);
+
+  const AvtItem = ({ title }) => {
+    const [matchData, setmatchData] = useState();
+    const [loading, setLoading] = useState(true);
+    useEffect(() => {
+      async function fetchUser() {
+        const snap = await getDoc(doc(db, "userDatas", title));
+        setmatchData(snap.data());
+        setLoading(false);
+      }
+      fetchUser();
+    }, [Matchdata]);
+    return (
+      <TouchableOpacity>
+        {loading ? (
+          <Text>Loading</Text>
+        ) : (
+          <View style={styles.listItem}>
+            <Image
+              resizeMode="stretch"
+              style={[
+                tw``,
+                styles.matchAvt,
+                { width: width * 0.18, height: (width * 0.19 * 4) / 3 },
+              ]}
+              source={{ uri: matchData.image[0] }}
+            />
+            <View
+              style={[
+                tw``,
+                {
+                  width: width * 0.17,
+                  alignItems: "center",
+                  justifyContent: "center",
+                },
+              ]}
+            >
+              <Text
+                style={[tw`font-bold text-xs`, {}]}
+                numberOfLines={1}
+                ellipsizeMode={"tail"}
+              >
+                {matchData.userName}
+              </Text>
+            </View>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
+  // const MessItem = ({ title, message }) => (
+  //   <TouchableOpacity style={{ marginBottom: 15 }}>
+  //     <View style={[styles.messItem, {}]}>
+  //       <Image
+  //         resizeMode="cover"
+  //         style={[
+  //           tw`self-center rounded-full`,
+  //           { width: width * 0.17, height: width * 0.17 },
+  //         ]}
+  //         source={require("../rose.jpg")}
+  //       />
+  //       <View style={[tw`ml-2 flex-1 justify-evenly  border-b`, styles.aloalo]}>
+  //         <Text style={tw` font-bold text-base`}>{title}</Text>
+  //         <Text style={[tw``, { color: "rgba(0, 0, 0, 0.7)" }]}>{message}</Text>
+  //       </View>
+  //     </View>
+  //   </TouchableOpacity>
+  // );
+
   const [text, setText] = useState("");
   const [data, setData] = useState([
     { id: "1", title: "First" },
@@ -118,7 +164,16 @@ const Message = () => {
       setText(text);
     }
   };
-  const renderItem = ({ item }) => <AvtItem title={item.title} />;
+  const renderItem = ({ item }) => <AvtItem title={item} />;
+
+  const realtime = getDatabase();
+  const starCountRef = ref(realtime, `${user.uid}/match`);
+  console.log(starCountRef);
+  onValue(starCountRef, (snapshot) => {
+    const data = snapshot.val();
+    Matchdata = data;
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <View
@@ -154,27 +209,24 @@ const Message = () => {
           clearButtonMode="always"
         />
       </View>
-      <ScrollView
-        style={styles.ScrollViewContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={tw`font-bold`}>Tương hợp</Text>
-        <View style={styles.listContain}>
-          <FlatList
-            data={data}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            horizontal={true}
-            style={styles.list}
-          />
-        </View>
-        <Text style={tw`font-bold pt-2 pb-4`}>Tin nhắn</Text>
-        {dataa.map((item, index) => (
-          <View key={index}>
-            <MessItem title={item.title} message={item.message} />
+      <View>
+        <ScrollView style={styles.ScrollViewContainer}>
+          <Text style={tw`font-bold`}>Tương hợp</Text>
+          <View style={styles.listContain}>
+            {Matchdata.map((item, index) => (
+              <View key={index}>
+                <AvtItem title={item} />
+              </View>
+            ))}
           </View>
-        ))}
-      </ScrollView>
+          {/* <Text style={tw`font-bold pt-2 pb-4`}>Tin nhắn</Text>
+          {dataa.map((item, index) => (
+            <View key={index}>
+              <MessItem title={item.title} message={item.message} />
+            </View>
+          ))} */}
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
@@ -207,8 +259,6 @@ const styles = StyleSheet.create({
   },
   matchAvt: {
     borderRadius: 40,
-    width: 70,
-    height: 90,
   },
   messItem: {
     flexDirection: "row",

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Alert,
   Modal,
   StyleSheet,
   Text,
@@ -10,10 +9,11 @@ import {
   SafeAreaView,
   ImageBackground,
   TextInput,
-  Picker,
   Image,
   TouchableOpacity,
+  useWindowDimensions,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import tw from "tailwind-react-native-classnames";
 import CircleCheckBox, { LABEL_POSITION } from "react-native-circle-checkbox";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
@@ -32,6 +32,7 @@ import Auth from "../ggAuth/Auth";
 import { useNavigation } from "@react-navigation/core";
 import { nanoid } from "nanoid";
 import "react-native-get-random-values";
+import IOSPicker from "react-native-ios-picker";
 
 const fullYear = new Date();
 const picker = [];
@@ -45,6 +46,7 @@ for (
 
 const ModalProfile = () => {
   const { user, SigninGoogle1, setUserData, userData, setData } = Auth();
+  const { width, height } = useWindowDimensions();
   // const [userData, setData] = Auth();
 
   const [textout, setTextout] = useState("1232132112");
@@ -58,11 +60,10 @@ const ModalProfile = () => {
 
   //Modal thêm ảnh
   const [modalImageVisible, setModalImageVisible] = useState(false);
-  const [pickerselectedValue, setpickerSelectedValue] = useState(2006);
+  const [pickerselectedValue, setpickerSelectedValue] = useState(picker[0]);
   const [imageUri, setImage] = useState();
   const [dataAfter, setAfter] = useState();
   const [okeModal, setOkmodal] = useState(false);
-
   const navigation = useNavigation();
 
   async function uploadImageAsync(uri) {
@@ -112,15 +113,27 @@ const ModalProfile = () => {
       });
   }
 
+  // const onPressActionSheet = () =>
+  //   ActionSheetIOS.showActionSheetWithOptions(
+  //     {
+  //       options: ["Cancel", "Generate number", "Reset"],
+  //       userInterfaceStyle: "dark",
+  //     },
+  //     (buttonIndex) => {
+  //       setpickerSelectedValue(picker[buttonIndex]);
+  //     }
+  //   );
+
   function addUserdataRealtime() {
     const database = getDatabase();
-    set(databaseRef(database, "liked/" + user.uid), [user.uid]);
+    set(databaseRef(database, user.uid + "/liked"), [user.uid]);
+    set(databaseRef(database, user.uid + "/match"), [user.uid]);
     console.log("oke");
   }
 
   async function uploaduserData() {
     const uri = await uploadImageAsync(imageUri);
-    addUserdataRealtime();
+    // addUserdataRealtime();
     addUserdata(uri);
     const snap = await getDoc(doc(db, "userDatas", user.uid));
     setAfter(snap.data());
@@ -128,11 +141,18 @@ const ModalProfile = () => {
   }
 
   const pickImage = async () => {
+    let permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      alert("Permission to access camera roll is required!");
+      return;
+    }
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [3, 4],
       quality: 1,
+      exif: true,
+      base64: true,
     });
 
     console.log(result);
@@ -152,7 +172,7 @@ const ModalProfile = () => {
         <Text
           style={[
             tw`text-white text-2xl font-semibold`,
-            { marginVertical: "12%", alignSelf: "center" },
+            { marginVertical: "20%", alignSelf: "center" },
           ]}
         >
           {textout}
@@ -213,17 +233,42 @@ const ModalProfile = () => {
                   <Text style={tw`mt-5 ml-2.5 italic font-bold text-base`}>
                     Năm sinh
                   </Text>
-                  <Picker
-                    selectedValue={pickerselectedValue}
-                    style={{ height: 60, width: 110 }}
-                    onValueChange={(itemValue, itemIndex) =>
-                      setpickerSelectedValue(itemValue)
-                    }
-                  >
-                    {picker.map((item, index) => (
-                      <Picker.Item key={index} label={"" + item} value={item} />
-                    ))}
-                  </Picker>
+                  {Platform.OS === "android" ? (
+                    <Picker
+                      selectedValue={pickerselectedValue}
+                      style={{ height: 60, width: 110 }}
+                      onValueChange={(itemValue, itemIndex) => {
+                        setpickerSelectedValue(itemValue);
+                      }}
+                    >
+                      {picker.map((item, index) => (
+                        <Picker.Item
+                          key={index}
+                          label={"" + item}
+                          value={item}
+                        />
+                      ))}
+                    </Picker>
+                  ) : (
+                    <TextInput
+                      clearButtonMode={"while-editing"}
+                      keyboardType={"number-pad"}
+                      placeholder="Nam sinh"
+                      value={pickerselectedValue}
+                      onChangeText={(newText) =>
+                        setpickerSelectedValue(newText)
+                      }
+                      style={[
+                        tw`rounded-full border mr-5 mt-5`,
+
+                        {
+                          borderColor: nameError
+                            ? "#FF0000"
+                            : "rgba(0,0,0,0.1)",
+                        },
+                      ]}
+                    ></TextInput>
+                  )}
                 </View>
                 <Text style={[styles.modalText]}>Mô tả</Text>
                 <TextInput
@@ -261,75 +306,81 @@ const ModalProfile = () => {
               </View>
             </View>
           </Modal>
-          <Modal
-            animationType="fade"
-            transparent={true}
-            onShow={() => setTextout("Thêm bức ảnh đầu tiên")}
-            visible={modalImageVisible}
-            onRequestClose={() => {
-              setModalImageVisible(!modalImageVisible);
-            }}
-          >
-            <View style={[styles.centeredView, tw`items-center`]}>
-              <View style={styles.modalView}>
-                <Text style={tw`text-center mt-4 ml-3 mr-3 italic text-base`}>
-                  {imageUri
-                    ? "Chúc mừng bạn đã chọn được bức ảnh ưng ý ♥♥♥"
-                    : "Hãy cùng thêm bức ảnh đầu tiên để mọi người có thể thấy được bạn nhé!"}
-                </Text>
-                <Pressable
-                  style={[
-                    tw`bg-gray-300 items-center mr-5 ml-5 mt-4 mb-8`,
-                    { paddingVertical: imageUri ? 0 : 144 },
-                  ]}
-                  onPress={pickImage}
-                >
-                  {imageUri ? (
-                    <>
-                      <View style={tw`items-center content-center`}>
-                        <Image
-                          resizeMode="stretch"
-                          style={[tw``, styles.imageChosen]}
-                          source={{ uri: imageUri }}
+          <View style={styles.centeredView}>
+            <Modal
+              animationType="fade"
+              transparent={true}
+              onShow={() => setTextout("Thêm bức ảnh đầu tiên")}
+              visible={modalImageVisible}
+              onRequestClose={() => {
+                setModalImageVisible(!modalImageVisible);
+              }}
+            >
+              <View style={styles.centeredView}>
+                <View style={[styles.modalView, { height: height * 0.6 }]}>
+                  <Text style={tw`text-center mt-4 ml-3 mr-3 italic text-base`}>
+                    {imageUri
+                      ? "Chúc mừng bạn đã chọn được bức ảnh ưng ý ♥♥♥"
+                      : "Hãy cùng thêm bức ảnh đầu tiên để mọi người có thể thấy được bạn nhé!"}
+                  </Text>
+                  <Pressable
+                    style={[
+                      tw`bg-gray-300 items-center justify-center mr-5 ml-5 mt-4`,
+                      { height: height * 0.4 },
+                    ]}
+                    onPress={pickImage}
+                  >
+                    {imageUri ? (
+                      <>
+                        <View style={tw`items-center content-center`}>
+                          <Image
+                            resizeMode="stretch"
+                            style={[tw``, styles.imageChosen]}
+                            source={{ uri: imageUri }}
+                          />
+                        </View>
+                      </>
+                    ) : (
+                      <>
+                        <FontAwesome
+                          name="plus-circle"
+                          size={50}
+                          color="gray"
                         />
-                      </View>
-                    </>
-                  ) : (
-                    <>
-                      <FontAwesome name="plus-circle" size={50} color="gray" />
-                    </>
-                  )}
-                </Pressable>
-                <View style={tw`justify-around mb-3 mt-2 flex-row`}>
-                  <Pressable
-                    onPress={() => {
-                      uploaduserData();
-                    }}
-                  >
-                    <SimpleLineIcons
-                      name="arrow-left-circle"
-                      color="gray"
-                      size={55}
-                    />
+                      </>
+                    )}
                   </Pressable>
-                  <Pressable
-                    onPress={() => {
-                      [
-                        setModalVisible(!modalNameVisible),
-                        setModalImageVisible(!modalImageVisible),
-                      ];
-                    }}
-                  >
-                    <SimpleLineIcons
-                      name="arrow-right-circle"
-                      color="gray"
-                      size={55}
-                    />
-                  </Pressable>
+                  <View style={tw`justify-around mt-2 flex-row self-center`}>
+                    <Pressable
+                      onPress={() => {
+                        [
+                          setModalVisible(!modalNameVisible),
+                          setModalImageVisible(!modalImageVisible),
+                        ];
+                      }}
+                    >
+                      <SimpleLineIcons
+                        name="arrow-left-circle"
+                        color="gray"
+                        size={55}
+                      />
+                    </Pressable>
+                    <Pressable
+                      onPress={() => {
+                        uploaduserData();
+                      }}
+                    >
+                      <SimpleLineIcons
+                        name="arrow-right-circle"
+                        color="gray"
+                        size={55}
+                      />
+                    </Pressable>
+                  </View>
                 </View>
               </View>
-            </View>
-          </Modal>
+            </Modal>
+          </View>
           <Modal
             animationType="fade"
             transparent={true}
@@ -383,6 +434,7 @@ const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
   },
   modalView: {
     backgroundColor: "rgba(255,255,255,1)",

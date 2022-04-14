@@ -138,25 +138,28 @@ const Home = ({ navigation }) => {
   }, []);
 
   const addLikeduser = (userId) => {
-    const dbb = getDatabase();
     let userLikedData = [];
-    get(ref(dbb, `liked/${userId}`))
-      .then((snapshot) => {
-        console.log(snapshot.val());
-        console.log(Likeddata);
-        userLikedData = snapshot.val();
-        const updates = {};
-        if (!Likeddata.includes(userId)) {
+    console.log(userId);
+    if (!Likeddata.includes(userId)) {
+      const dbb = getDatabase();
+      get(ref(dbb, `${userId}/liked`))
+        .then((snapshot) => {
+          console.log("1               " + snapshot.val());
+          console.log(Likeddata);
+          userLikedData = snapshot.val();
+          const updates = {};
           userLikedData.push(user.uid);
-          updates[`liked/${userId}`] = userLikedData;
+          console.log(userLikedData);
+          updates[`${userId}/liked`] = userLikedData;
           return update(ref(realtime), updates);
-        } else {
-          navtoMatch(userId);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } else {
+      navtoMatch(userId);
+    }
+
     // const updates = {};
     // if (!userLikedData.includes("thanh")) {
     //   console.log(userLikedData);
@@ -168,7 +171,7 @@ const Home = ({ navigation }) => {
   };
 
   const realtime = getDatabase();
-  const starCountRef = ref(realtime, `liked/${user.uid}`);
+  const starCountRef = ref(realtime, `${user.uid}/liked`);
   onValue(starCountRef, (snapshot) => {
     const data = snapshot.val();
     Likeddata = data;

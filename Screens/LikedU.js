@@ -28,10 +28,9 @@ import { auth, db } from "../ggAuth/firebase-con";
 const LikedU = () => {
   const { height, width } = useWindowDimensions();
   const { user, Logout, userData } = Auth();
-  const [test, setTest] = useState(true);
   let Likeddata = [];
 
-  const LikedItem = ({ uri }) => {
+  const LikedItem = ({ uri, index }) => {
     const [likeData, setlikeData] = useState();
     const [loading, setLoading] = useState(true);
     useEffect(() => {
@@ -42,6 +41,9 @@ const LikedU = () => {
       }
       fetchUser();
     }, [Likeddata]);
+    // if (index == 0) {
+    //   return null;
+    // }
     return (
       <View style={tw`mb-3`}>
         {loading ? (
@@ -64,7 +66,7 @@ const LikedU = () => {
   };
 
   const realtime = getDatabase();
-  const starCountRef = ref(realtime, `liked/${user.uid}`);
+  const starCountRef = ref(realtime, `${user.uid}/liked`);
   onValue(starCountRef, (snapshot) => {
     const data = snapshot.val();
     Likeddata = data;
@@ -108,7 +110,7 @@ const LikedU = () => {
             <View style={tw`flex-row flex-wrap justify-evenly`}>
               {Likeddata.map((item, index) => (
                 <View key={index}>
-                  <LikedItem uri={item} />
+                  <LikedItem uri={item} index={index} />
                 </View>
               ))}
             </View>
