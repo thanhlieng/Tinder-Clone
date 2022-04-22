@@ -15,6 +15,15 @@ import tw from "tailwind-react-native-classnames";
 import Auth from "../ggAuth/Auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../ggAuth/firebase-con";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  update,
+  get,
+  child,
+  push,
+} from "firebase/database";
 
 const Matched = ({ route, navigation: { goBack } }) => {
   const { user, userData } = Auth();
@@ -22,10 +31,71 @@ const Matched = ({ route, navigation: { goBack } }) => {
   const { height, width } = useWindowDimensions();
   const [matchData, setmatchData] = useState();
   const [loading, setLoading] = useState(true);
+  const [chatrooms, setchatroom] = useState();
   useEffect(() => {
     async function fetchUser() {
+      const database = getDatabase();
+      get(ref(database, `${user.uid}/liked`))
+        .then((snapshot) => {
+          const userArray = snapshot.val();
+          const newArray = userArray.filter((user) => user !== matchId);
+          update(ref(database, `${user.uid}`), {
+            liked: newArray,
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
       const snap = await getDoc(doc(db, "userDatas", matchId));
       setmatchData(snap.data());
+      const newChatroomRef = push(ref(database, "chatrooms"), {
+        firstUser: user.uid,
+        secondUser: matchId,
+        messages: [],
+        lastUpdate: new Date(),
+      });
+      get(ref(database, `${matchId}/chatrooms`))
+        .then((snapshot) => {
+          const chatRoomId = snapshot.val();
+          update(ref(database, `${matchId}`), {
+            chatrooms: [...chatRoomId, newChatroomRef.key],
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      get(ref(database, `${user.uid}/chatrooms`))
+        .then((snapshot) => {
+          const chatRoomId = snapshot.val();
+          update(ref(database, `${user.uid}`), {
+            chatrooms: [...chatRoomId, newChatroomRef.key],
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      get(ref(database, `${user.uid}/match`))
+        .then((snapshot) => {
+          const usermatchData = snapshot.val();
+          update(ref(database, `${user.uid}`), {
+            match: [...usermatchData, matchId],
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      get(ref(database, `${matchId}/match`))
+        .then((snapshot) => {
+          const usermatchData = snapshot.val();
+          update(ref(database, `${matchId}`), {
+            match: [...usermatchData, user.uid],
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+      console.log(newChatroomRef.key);
+      setchatroom(newChatroomRef.key);
       setLoading(false);
     }
     fetchUser();

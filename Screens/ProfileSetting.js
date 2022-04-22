@@ -185,7 +185,7 @@ const ProfileSetting = () => {
           <Text style={[styles.textProfile]}>Năm sinh</Text>
           <Picker
             selectedValue={datas.birthYear}
-            style={[{ height: 50, width: "80%" }, tw`ml-5`]}
+            style={[{ height: 50, width: "90%" }, tw`ml-5`]}
             onValueChange={(itemValue, itemIndex) =>
               setDatas((prevState) => ({
                 ...prevState,

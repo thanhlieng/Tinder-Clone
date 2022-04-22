@@ -12,6 +12,7 @@ import {
   ScrollView,
   Pressable,
   useWindowDimensions,
+  ActivityIndicator,
 } from "react-native";
 import Auth from "../ggAuth/Auth";
 import tw from "tailwind-react-native-classnames";
@@ -28,86 +29,107 @@ import {
 import { db } from "../ggAuth/firebase-con";
 import { doc, getDoc } from "firebase/firestore";
 
-const Message = () => {
+const Message = ({ navigation }) => {
   const { width, height } = useWindowDimensions();
-  const { user, Logout, userData } = Auth();
-  const { loading, setLoading } = useState(true);
+  const { user, Logout, userData, matchData } = Auth();
+  const [loading, setLoading] = useState(true);
   const { dataFetch, dataset } = useState();
-  let Matchdata = [];
+  const [matchingData, setmatchingData] = useState([]);
+  const [matchingDataAvt, setmatchingDataAvt] = useState([]);
+  let matchMessage = [];
 
-  // useEffect(() => {
-  //   () => dataset(Matchdata);
-  //   () => setLoading(false);
-  // }, [Matchdata]);
+  const fetchData = async (data) => {
+    const snap = await getDoc(doc(db, "userDatas", data));
+    setmatchingData([...matchingData, snap.data()]);
+    setmatchingDataAvt([...matchingDataAvt, snap.data()]);
+  };
+
+  useEffect(() => {
+    async function getMatchingData() {
+      matchData.forEach((data) => {
+        if (data !== user.uid) {
+          fetchData(data);
+        }
+      });
+      setLoading(false);
+    }
+    getMatchingData();
+  }, [matchData]);
 
   const AvtItem = ({ title }) => {
-    const [matchData, setmatchData] = useState();
-    const [loading, setLoading] = useState(true);
-    useEffect(() => {
-      async function fetchUser() {
-        const snap = await getDoc(doc(db, "userDatas", title));
-        setmatchData(snap.data());
-        setLoading(false);
-      }
-      fetchUser();
-    }, [Matchdata]);
     return (
-      <TouchableOpacity>
-        {loading ? (
-          <Text>Loading</Text>
-        ) : (
-          <View style={styles.listItem}>
-            <Image
-              resizeMode="stretch"
-              style={[
-                tw``,
-                styles.matchAvt,
-                { width: width * 0.18, height: (width * 0.19 * 4) / 3 },
-              ]}
-              source={{ uri: matchData.image[0] }}
-            />
-            <View
-              style={[
-                tw``,
-                {
-                  width: width * 0.17,
-                  alignItems: "center",
-                  justifyContent: "center",
-                },
-              ]}
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("Chat", {
+            matchId: title.id,
+            chatroomsId: null,
+            image: title.image[0],
+            name: title.userName,
+          })
+        }
+      >
+        <View style={styles.listItem}>
+          <Image
+            resizeMode="stretch"
+            style={[
+              tw``,
+              styles.matchAvt,
+              { width: width * 0.18, height: (width * 0.19 * 4) / 3 },
+            ]}
+            source={{ uri: title.image[0] }}
+          />
+          <View
+            style={[
+              tw``,
+              {
+                width: width * 0.17,
+                alignItems: "center",
+                justifyContent: "center",
+              },
+            ]}
+          >
+            <Text
+              style={[tw`font-bold text-xs`, {}]}
+              numberOfLines={1}
+              ellipsizeMode={"tail"}
             >
-              <Text
-                style={[tw`font-bold text-xs`, {}]}
-                numberOfLines={1}
-                ellipsizeMode={"tail"}
-              >
-                {matchData.userName}
-              </Text>
-            </View>
+              {title.userName}
+            </Text>
           </View>
-        )}
+        </View>
       </TouchableOpacity>
     );
   };
 
-  // const MessItem = ({ title, message }) => (
-  //   <TouchableOpacity style={{ marginBottom: 15 }}>
-  //     <View style={[styles.messItem, {}]}>
-  //       <Image
-  //         resizeMode="cover"
-  //         style={[
-  //           tw`self-center rounded-full`,
-  //           { width: width * 0.17, height: width * 0.17 },
-  //         ]}
-  //         source={require("../rose.jpg")}
-  //       />
-  //       <View style={[tw`ml-2 flex-1 justify-evenly  border-b`, styles.aloalo]}>
-  //         <Text style={tw` font-bold text-base`}>{title}</Text>
-  //         <Text style={[tw``, { color: "rgba(0, 0, 0, 0.7)" }]}>{message}</Text>
-  //       </View>
-  //     </View>
-  //   </TouchableOpacity>
-  // );
+  const MessItem = ({ title, message }) => (
+    <TouchableOpacity
+      style={{ marginBottom: 15 }}
+      onPress={() =>
+        navigation.navigate("Chat", {
+          matchId: "P1TXITCftqaz5jzkkaAMssPW0Tm1",
+          chatroomsId: "-N04NR99YhtDfLKiz2vj",
+          image:
+            "https://firebasestorage.googleapis.com/v0/b/rn-app-59deb.appspot.com/o/P1TXITCftqaz5jzkkaAMssPW0Tm1%2Fimages%2FOADt4NjWtmIl-1sacz0t0.jpeg?alt=media&token=7f472022-02e6-4f89-a5a3-290d20b71d66",
+          name: "yhuhjh",
+        })
+      }
+    >
+      <View style={[styles.messItem, {}]}>
+        <Image
+          resizeMode="cover"
+          style={[
+            tw`self-center rounded-full`,
+            { width: width * 0.17, height: width * 0.17 },
+          ]}
+          source={require("../rose.jpg")}
+        />
+        <View style={[tw`ml-2 flex-1 justify-evenly  border-b`, styles.aloalo]}>
+          <Text style={tw` font-bold text-base`}>{title}</Text>
+          <Text style={[tw``, { color: "rgba(0, 0, 0, 0.7)" }]}>{message}</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
   const [text, setText] = useState("");
   const [data, setData] = useState([
@@ -148,85 +170,110 @@ const Message = () => {
 
   const handleSearch = (text) => {
     if (text) {
-      const newData = dataOriginal.filter(function (item) {
-        const itemData = item.title
-          ? item.title.toUpperCase()
+      const newData = matchingData.reverse().filter(function (item) {
+        const itemData = item.userName
+          ? item.userName.toUpperCase()
           : "".toUpperCase();
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
       });
-      setData(newData);
+      setmatchingData(newData);
       setDataa(newData);
       setText(text);
     } else {
-      setData(dataOriginal);
+      setmatchingData(matchingDataAvt);
       setDataa(dataOriginall);
       setText(text);
     }
   };
-  const renderItem = ({ item }) => <AvtItem title={item} />;
 
-  const realtime = getDatabase();
-  const starCountRef = ref(realtime, `${user.uid}/match`);
-  console.log(starCountRef);
-  onValue(starCountRef, (snapshot) => {
-    const data = snapshot.val();
-    Matchdata = data;
-  });
+  // const realtime = getDatabase();
+  // const starCountRef = ref(realtime, `${user.uid}/match`);
+  // console.log(starCountRef);
+  // onValue(starCountRef, (snapshot) => {
+  //   const data = snapshot.val();
+  //   Matchdata = data;
+  // });
+
+  const renderItem = ({ item }) => <AvtItem title={item} />;
 
   return (
     <SafeAreaView style={styles.container}>
-      <View
-        style={tw`h-14 flex-row justify-center items-center relative bg-white`}
-      >
-        <Pressable
-          style={tw`absolute left-6 h-11 w-11 justify-center self-center`}
-        >
-          <Image
-            resizeMode="cover"
-            source={{ uri: "" + userData.image[0] }}
-            style={[tw`w-9 h-9 rounded-full self-center `, styles.profileImage]}
-          />
-        </Pressable>
-        <Image
-          resizeMode="contain"
-          style={tw`h-full w-20 self-center`}
-          source={require("../Tinder-Logo.png")}
-        />
-      </View>
-      <View style={tw` flex-row`}>
-        <Ionicons
-          name="search"
-          color={"pink"}
-          size={26}
-          style={tw`p-2 pl-4 pr-4`}
-        />
-        <TextInput
-          onChangeText={(setText) => handleSearch(setText)}
-          style={[styles.searchInput, tw`w-full pr-4`]}
-          placeholder="Type a message to search"
-          autoComplete={false}
-          clearButtonMode="always"
-        />
-      </View>
-      <View>
-        <ScrollView style={styles.ScrollViewContainer}>
-          <Text style={tw`font-bold`}>Tương hợp</Text>
-          <View style={styles.listContain}>
-            {Matchdata.map((item, index) => (
-              <View key={index}>
-                <AvtItem title={item} />
-              </View>
-            ))}
+      {loading ? (
+        <ActivityIndicator size={"large"} />
+      ) : (
+        <View>
+          <View
+            style={[
+              tw`flex-row justify-evenly items-center bg-white w-full`,
+              { height: height * 0.055 },
+            ]}
+          >
+            <Pressable
+              onPress={() => navigation.navigate("User")}
+              style={tw`justify-center self-center`}
+            >
+              <Image
+                resizeMode="cover"
+                source={{ uri: "" + userData.image[0] }}
+                style={[
+                  tw` rounded-full self-center `,
+                  { height: height * 0.04, width: height * 0.04 },
+                ]}
+              />
+            </Pressable>
+            <Image
+              resizeMode="contain"
+              style={[tw`h-full self-center`, { width: "50%" }]}
+              source={require("../Tinder-Logo.png")}
+            />
+            <Pressable>
+              <View
+                style={[
+                  tw` rounded-full self-center `,
+                  { height: height * 0.04, width: height * 0.04 },
+                ]}
+              />
+            </Pressable>
           </View>
-          {/* <Text style={tw`font-bold pt-2 pb-4`}>Tin nhắn</Text>
-          {dataa.map((item, index) => (
-            <View key={index}>
-              <MessItem title={item.title} message={item.message} />
-            </View>
-          ))} */}
-        </ScrollView>
-      </View>
+          <View style={tw` flex-row`}>
+            <Ionicons
+              name="search"
+              color={"pink"}
+              size={26}
+              style={tw`p-2 pl-4 pr-4`}
+            />
+            <TextInput
+              onChangeText={(setText) => handleSearch(setText)}
+              style={[styles.searchInput, tw`w-full pr-4`]}
+              placeholder="Type a message to search"
+              autoComplete={false}
+              clearButtonMode="always"
+            />
+          </View>
+          <View>
+            <ScrollView
+              style={styles.ScrollViewContainer}
+              showsVerticalScrollIndicator={false}
+            >
+              <Text style={tw`font-bold pb-2`}>Tương hợp</Text>
+              <FlatList
+                data={matchingData.reverse()}
+                renderItem={renderItem}
+                keyExtractor={(item) => item}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+              />
+              <Text style={tw`font-bold pt-2 pb-4`}>Tin nhắn</Text>
+              {dataa.map((item, index) => (
+                <View key={index}>
+                  <MessItem title={item.title} message={item.message} />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };

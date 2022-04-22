@@ -3,36 +3,28 @@ import {
   Text,
   SafeAreaView,
   Image,
-  TouchableOpacity,
   Pressable,
   StyleSheet,
   StatusBar,
-  FlatList,
   ScrollView,
   useWindowDimensions,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import tw from "tailwind-react-native-classnames";
 import Auth from "../ggAuth/Auth";
-import {
-  getDatabase,
-  ref,
-  onValue,
-  update,
-  get,
-  child,
-} from "firebase/database";
 import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../ggAuth/firebase-con";
+import { db } from "../ggAuth/firebase-con";
 
-const LikedU = () => {
+const LikedU = ({ navigation }) => {
   const { height, width } = useWindowDimensions();
-  const { user, Logout, userData } = Auth();
-  let Likeddata = [];
+  const { user, userData, likedData } = Auth();
 
-  const LikedItem = ({ uri, index }) => {
+  const LikedItem = ({ uri }) => {
     const [likeData, setlikeData] = useState();
     const [loading, setLoading] = useState(true);
+    if (uri === user.uid) {
+      return null;
+    }
     useEffect(() => {
       async function fetchUser() {
         const snap = await getDoc(doc(db, "userDatas", uri));
@@ -40,21 +32,19 @@ const LikedU = () => {
         setLoading(false);
       }
       fetchUser();
-    }, [Likeddata]);
-    // if (index == 0) {
-    //   return null;
-    // }
+    }, [likedData]);
     return (
       <View style={tw`mb-3`}>
         {loading ? (
-          <Text>Loading</Text>
+          <Image
+            style={[{ width: width * 0.48, height: width * 0.6 }]}
+            source={{ uri: "https://i.stack.imgur.com/FsMtu.gif" }}
+          />
         ) : (
           <Pressable>
             <Image
-              resizeMode="stretch"
               style={[
-                { width: width * 0.47, height: width * 0.6 },
-                styles.LikedImage,
+                { width: width * 0.48, height: width * 0.6, borderRadius: 10 },
               ]}
               source={{ uri: likeData.image[0] }}
               blurRadius={150}
@@ -65,24 +55,17 @@ const LikedU = () => {
     );
   };
 
-  const realtime = getDatabase();
-  const starCountRef = ref(realtime, `${user.uid}/liked`);
-  onValue(starCountRef, (snapshot) => {
-    const data = snapshot.val();
-    Likeddata = data;
-  });
-
   return (
     <SafeAreaView style={styles.container}>
       <View
         style={[
-          tw`flex-row justify-center items-center relative bg-white w-full top-0`,
+          tw`flex-row justify-evenly items-center bg-white w-full`,
           { height: height * 0.055 },
         ]}
       >
         <Pressable
           onPress={() => navigation.navigate("User")}
-          style={tw`absolute left-6 h-11 w-11 justify-center self-center`}
+          style={tw`justify-center self-center`}
         >
           <Image
             resizeMode="cover"
@@ -98,25 +81,28 @@ const LikedU = () => {
           style={[tw`h-full self-center`, { width: "50%" }]}
           source={require("../Tinder-Logo.png")}
         />
+        <Pressable>
+          <View
+            style={[
+              tw` rounded-full self-center `,
+              { height: height * 0.04, width: height * 0.04 },
+            ]}
+          />
+        </Pressable>
       </View>
-      <View style={tw`flex-1`}>
-        <Text
-          style={tw`text-lg font-semibold border-b pb-4 w-full text-center border-pink-600 `}
-        >
-          Đã thích bạn
-        </Text>
-        <View style={tw`flex-1 mt-4 `}>
-          <ScrollView>
-            <View style={tw`flex-row flex-wrap justify-evenly`}>
-              {Likeddata.map((item, index) => (
-                <View key={index}>
-                  <LikedItem uri={item} index={index} />
-                </View>
-              ))}
-            </View>
-          </ScrollView>
-        </View>
-      </View>
+      <Text
+        style={tw`text-lg font-semibold border-b pb-4 w-full text-center border-pink-600 `}
+      >
+        Đã thích bạn
+      </Text>
+      <ScrollView
+        style={{ marginTop: 20 }}
+        contentContainerStyle={styles.liked}
+      >
+        {likedData.reverse().map((item, index) => (
+          <LikedItem uri={item} key={index} />
+        ))}
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -128,8 +114,11 @@ const styles = StyleSheet.create({
     marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     backgroundColor: "white",
   },
-  LikedImage: {
-    borderRadius: 20,
+  liked: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-evenly",
+    alignContent: "flex-end",
   },
 });
 

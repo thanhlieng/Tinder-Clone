@@ -60,7 +60,7 @@ function* range(start, end) {
 const Home = ({ navigation }) => {
   const { height, width } = useWindowDimensions();
   const [cardIndex, setcardIndex] = useState(0);
-  const { user, Logout, userData } = Auth();
+  const { user, Logout, userData, likedData } = Auth();
   const pressedRed = useSharedValue(false);
   const pressedGreen = useSharedValue(false);
   const Swiperef = useRef(null);
@@ -138,20 +138,15 @@ const Home = ({ navigation }) => {
   }, []);
 
   const addLikeduser = (userId) => {
-    let userLikedData = [];
     console.log(userId);
-    if (!Likeddata.includes(userId)) {
+    if (!likedData.includes(userId)) {
       const dbb = getDatabase();
       get(ref(dbb, `${userId}/liked`))
         .then((snapshot) => {
-          console.log("1               " + snapshot.val());
-          console.log(Likeddata);
-          userLikedData = snapshot.val();
-          const updates = {};
-          userLikedData.push(user.uid);
-          console.log(userLikedData);
-          updates[`${userId}/liked`] = userLikedData;
-          return update(ref(realtime), updates);
+          const userLikedData = snapshot.val();
+          update(ref(dbb, `${userId}`), {
+            liked: [...userLikedData, user.uid],
+          });
         })
         .catch((error) => {
           console.error(error);
@@ -170,12 +165,12 @@ const Home = ({ navigation }) => {
     // console.log("&1" + userLikedData);
   };
 
-  const realtime = getDatabase();
-  const starCountRef = ref(realtime, `${user.uid}/liked`);
-  onValue(starCountRef, (snapshot) => {
-    const data = snapshot.val();
-    Likeddata = data;
-  });
+  // const realtime = getDatabase();
+  // const starCountRef = ref(realtime, `${user.uid}/liked`);
+  // onValue(starCountRef, (snapshot) => {
+  //   const data = snapshot.val();
+  //   Likeddata = data;
+  // });
 
   const navtoMatch = (Id2) => {
     navigation.navigate("match", {
@@ -215,8 +210,8 @@ const Home = ({ navigation }) => {
           layout="tinder"
           ref={Carouselref}
           data={allData[index].image}
-          sliderWidth={width * 0.95}
-          itemWidth={width * 0.95}
+          sliderWidth={width * 0.98}
+          itemWidth={width * 0.98}
           renderItem={renderImage}
           inactiveSlideShift={0}
           useScrollView={true}
@@ -305,13 +300,13 @@ const Home = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View
         style={[
-          tw`flex-row justify-center items-center relative bg-white w-full absolute top-0`,
+          tw`flex-row justify-evenly items-center bg-white w-full absolute top-0`,
           { height: height * 0.055 },
         ]}
       >
         <Pressable
           onPress={() => navigation.navigate("User")}
-          style={tw`absolute left-6 h-11 w-11 justify-center self-center`}
+          style={tw`justify-center self-center`}
         >
           <Image
             resizeMode="cover"
@@ -327,23 +322,17 @@ const Home = ({ navigation }) => {
           style={[tw`h-full self-center`, { width: "50%" }]}
           source={require("../Tinder-Logo.png")}
         />
+        <Pressable>
+          <View
+            style={[
+              tw` rounded-full self-center `,
+              { height: height * 0.04, width: height * 0.04 },
+            ]}
+          />
+        </Pressable>
       </View>
       {loading ? (
-        <View style={[styles.card]} onLayout={onLayout}>
-          <Carousel
-            layout="tinder"
-            ref={Carouselref}
-            data={imagedata[0].uri}
-            sliderWidth={carouselWidth}
-            itemWidth={carouselWidth}
-            renderItem={renderImage}
-            inactiveSlideShift={0}
-            useScrollView={true}
-            scrollEnabled={false}
-            onSnapToItem={(index) => setIndex(index)}
-            style={tw`bg-red-500`}
-          />
-        </View>
+        <ActivityIndicator size="large" />
       ) : (
         <View style={[tw`bg-red-500`, { height: height * 0.85 }]}>
           <Swiper
@@ -354,7 +343,7 @@ const Home = ({ navigation }) => {
             renderCard={renderCard}
             verticalSwipe={false}
             cardVerticalMargin={0}
-            cardHorizontalMargin={width * 0.025}
+            cardHorizontalMargin={width * 0.01}
             overlayLabels={{
               left: {
                 title: "NOPE",

@@ -21,6 +21,7 @@ import Auth from "../ggAuth/Auth";
 import Login from "../Screens/Login";
 import { ScreenStackHeaderLeftView } from "react-native-screens";
 import { useWindowDimensions } from "react-native";
+import Chat from "../Screens/Chat";
 
 const BottomNavigationTab = createMaterialBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -66,7 +67,7 @@ function BottomTabs() {
         }}
       /> */}
       <Tab.Screen
-        name="LikeU"
+        name="LikedU"
         component={LikedU}
         options={{
           tabBarLabel: "LikeU",
@@ -107,10 +108,15 @@ function HomeNav() {
         component={BottomTabs}
         options={{ headerShown: false }}
       />
-      <Stack.Screen name="match" component={Matched} />
+      <Stack.Screen
+        name="match"
+        component={Matched}
+        options={{ headerShown: false }}
+      />
       <Stack.Screen name="User" component={UserProfile} />
       <Stack.Screen name="profile" component={ProfileSetting} />
       <Stack.Screen name="setting" component={Setting} />
+      <Stack.Screen name="Chat" component={Chat} />
     </Stack.Navigator>
   );
 }

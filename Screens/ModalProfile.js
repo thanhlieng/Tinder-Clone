@@ -135,6 +135,7 @@ const ModalProfile = () => {
     const uri = await uploadImageAsync(imageUri);
     // addUserdataRealtime();
     addUserdata(uri);
+    addUserdataRealtime();
     const snap = await getDoc(doc(db, "userDatas", user.uid));
     setAfter(snap.data());
     setOkmodal(true);
@@ -172,7 +173,7 @@ const ModalProfile = () => {
         <Text
           style={[
             tw`text-white text-2xl font-semibold`,
-            { marginVertical: "20%", alignSelf: "center" },
+            { marginVertical: "15%", alignSelf: "center" },
           ]}
         >
           {textout}
@@ -188,7 +189,7 @@ const ModalProfile = () => {
             }}
           >
             <View style={styles.centeredView}>
-              <View style={styles.modalView}>
+              <View style={[styles.modalView, { width: width * 0.8 }]}>
                 <Text style={styles.modalText}>Tên của bạn</Text>
                 <TextInput
                   autoCapitalize={"words"}
@@ -317,7 +318,7 @@ const ModalProfile = () => {
               }}
             >
               <View style={styles.centeredView}>
-                <View style={[styles.modalView, { height: height * 0.6 }]}>
+                <View style={[styles.modalView, { height: height * 0.7 }]}>
                   <Text style={tw`text-center mt-4 ml-3 mr-3 italic text-base`}>
                     {imageUri
                       ? "Chúc mừng bạn đã chọn được bức ảnh ưng ý ♥♥♥"
@@ -326,7 +327,7 @@ const ModalProfile = () => {
                   <Pressable
                     style={[
                       tw`bg-gray-300 items-center justify-center mr-5 ml-5 mt-4`,
-                      { height: height * 0.4 },
+                      { height: height * 0.5 },
                     ]}
                     onPress={pickImage}
                   >
@@ -335,7 +336,10 @@ const ModalProfile = () => {
                         <View style={tw`items-center content-center`}>
                           <Image
                             resizeMode="stretch"
-                            style={[tw``, styles.imageChosen]}
+                            style={[
+                              tw``,
+                              { height: height * 0.5, width: height * 0.4 },
+                            ]}
                             source={{ uri: imageUri }}
                           />
                         </View>
@@ -350,7 +354,7 @@ const ModalProfile = () => {
                       </>
                     )}
                   </Pressable>
-                  <View style={tw`justify-around mt-2 flex-row self-center`}>
+                  <View style={tw`justify-around mt-2 flex-row`}>
                     <Pressable
                       onPress={() => {
                         [
@@ -474,10 +478,10 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
-  imageChosen: {
-    width: 270,
-    height: 360,
-  },
+  // imageChosen: {
+  //   width: 270,
+  //   height: 360,
+  // },
   textInput: {
     borderColor: "rgba(0,0,0,0.1)",
     paddingLeft: 20,

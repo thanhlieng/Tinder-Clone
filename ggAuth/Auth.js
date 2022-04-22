@@ -14,6 +14,14 @@ import {
 } from "firebase/auth";
 import { auth, db } from "../ggAuth/firebase-con";
 import { doc, getDoc } from "firebase/firestore";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  update,
+  get,
+  child,
+} from "firebase/database";
 
 const AuthContext = createContext({});
 
@@ -32,18 +40,34 @@ export const ContextProvider = ({ children }) => {
   const [loadingIndicator, setLoadingIndicator] = useState(true);
   const [Loading, setLoading] = useState(false);
   const [userData, setData] = useState(null);
+  const [likedData, setLiked] = useState(null);
+  const [matchData, setMatch] = useState(null);
 
   useEffect(() => {
-    async function fetchUser() {
+    async function fetchUserdata() {
       const snap = await getDoc(doc(db, "userDatas", user.uid));
       setData(snap.data());
+      const realtime = getDatabase();
+      const starCountReffLike = ref(realtime, `${user.uid}/liked`);
+      onValue(starCountReffLike, (snapshot) => {
+        const data = snapshot.val();
+        setLiked(data);
+      });
+      const starCountRefMatch = ref(realtime, `${user.uid}/match`);
+      onValue(starCountRefMatch, (snapshot) => {
+        const data = snapshot.val();
+        setMatch(data);
+      });
     }
     onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
-        fetchUser();
+        fetchUserdata();
       } else {
         setUser(null);
+        setData(null);
+        setLiked(null);
+        setMatch(null);
       }
       setLoadingIndicator(false);
     });
@@ -59,10 +83,10 @@ export const ContextProvider = ({ children }) => {
   //   }, []);
   // }
 
-  const SigninGoogle1 = async () => {
-    const snap = await getDoc(doc(db, "userDatas", user.uid));
-    setData(snap.data());
-  };
+  // const SigninGoogle1 = async () => {
+  //   const snap = await getDoc(doc(db, "userDatas", user.uid));
+  //   setData(snap.data());
+  // };
 
   const SigninGoogle = async () => {
     setLoading(true);
@@ -85,8 +109,10 @@ export const ContextProvider = ({ children }) => {
 
   const Logout = () => {
     setLoading(true);
-    setData(null);
     setUser(null);
+    setData(null);
+    setLiked(null);
+    setMatch(null);
     signOut(auth)
       .catch((error) => setError(error))
       .finally(() => setLoading(false));
@@ -103,11 +129,12 @@ export const ContextProvider = ({ children }) => {
       Loading,
       Logout,
       SigninGoogle,
-      SigninGoogle1,
       userData,
       setUserData,
+      likedData,
+      matchData,
     }),
-    [user, Loading, error, userData]
+    [user, Loading, error, userData, likedData, matchData]
   );
 
   return (
