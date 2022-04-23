@@ -31,17 +31,31 @@ import { doc, getDoc } from "firebase/firestore";
 
 const Message = ({ navigation }) => {
   const { width, height } = useWindowDimensions();
-  const { user, Logout, userData, matchData } = Auth();
+  const { user, Logout, userData, matchData, chatrooms } = Auth();
   const [loading, setLoading] = useState(true);
   const { dataFetch, dataset } = useState();
   const [matchingData, setmatchingData] = useState([]);
   const [matchingDataAvt, setmatchingDataAvt] = useState([]);
+  const [matchingDataMess, setmatchingDataMess] = useState([]);
+  const [matchingDataMessage, setmatchingDataMessage] = useState([]);
   let matchMessage = [];
+
+  console.log(chatrooms);
 
   const fetchData = async (data) => {
     const snap = await getDoc(doc(db, "userDatas", data));
     setmatchingData([...matchingData, snap.data()]);
     setmatchingDataAvt([...matchingDataAvt, snap.data()]);
+  };
+
+  const fetchMess = async (data) => {
+    const database = getDatabase();
+    const starCountRefMess = ref(database, `chatrooms/${data}`);
+    onValue(starCountRefMess, (snapshot) => {
+      const dataS = snapshot.val();
+      setmatchingDataMess([...matchingDataMess, dataS]);
+      setmatchingDataMessage([...matchingDataMessage, dataS]);
+    });
   };
 
   useEffect(() => {
@@ -51,9 +65,15 @@ const Message = ({ navigation }) => {
           fetchData(data);
         }
       });
-      setLoading(false);
+    }
+    async function getMessdata() {
+      chatrooms.forEach((data) => {
+        fetchMess(data);
+      });
     }
     getMatchingData();
+    // getMessdata();
+    setLoading(false);
   }, [matchData]);
 
   const AvtItem = ({ title }) => {
@@ -177,6 +197,7 @@ const Message = ({ navigation }) => {
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
       });
+
       setmatchingData(newData);
       setDataa(newData);
       setText(text);

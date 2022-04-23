@@ -139,7 +139,7 @@ const BottomNavigation = () => {
 
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
-      {user ? (
+      {/* {user ? (
         <>
           {userData ? (
             <Stack.Screen
@@ -161,6 +161,30 @@ const BottomNavigation = () => {
           component={LoginNav}
           options={{ headerShown: false }}
         />
+      )} */}
+
+      {user && userData ? (
+        <Stack.Screen
+          name="Home1"
+          component={HomeNav}
+          options={{ headerShown: false }}
+        />
+      ) : (
+        <>
+          {user ? (
+            <Stack.Screen
+              name="Modal"
+              component={ModalProfile}
+              options={{ headerShown: false }}
+            />
+          ) : (
+            <Stack.Screen
+              name="login"
+              component={LoginNav}
+              options={{ headerShown: false }}
+            />
+          )}
+        </>
       )}
     </Stack.Navigator>
   );

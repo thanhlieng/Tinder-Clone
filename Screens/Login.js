@@ -8,11 +8,6 @@ import navigation from "@react-navigation/native-stack";
 const Login = () => {
   const { SigninGoogle, userData, user, Loading } = Auth();
   const navigation = useNavigation();
-  const Signin = () => {
-    if (!Loading && user && !userData) {
-      () => navigation.navigate("Modal");
-    }
-  };
 
   return (
     <View style={tw`flex-1`}>

@@ -42,22 +42,33 @@ export const ContextProvider = ({ children }) => {
   const [userData, setData] = useState(null);
   const [likedData, setLiked] = useState(null);
   const [matchData, setMatch] = useState(null);
+  const [chatrooms, setchatrooms] = useState(null);
 
   useEffect(() => {
     async function fetchUserdata() {
       const snap = await getDoc(doc(db, "userDatas", user.uid));
       setData(snap.data());
-      const realtime = getDatabase();
-      const starCountReffLike = ref(realtime, `${user.uid}/liked`);
-      onValue(starCountReffLike, (snapshot) => {
-        const data = snapshot.val();
-        setLiked(data);
-      });
-      const starCountRefMatch = ref(realtime, `${user.uid}/match`);
-      onValue(starCountRefMatch, (snapshot) => {
-        const data = snapshot.val();
-        setMatch(data);
-      });
+      if (snap.data()) {
+        const realtime = getDatabase();
+        const starCountReffLike = ref(realtime, `${user.uid}/liked`);
+        onValue(starCountReffLike, (snapshot) => {
+          const data = snapshot.val();
+          setLiked(data);
+        });
+        const starCountRefMatch = ref(realtime, `${user.uid}/match`);
+        onValue(starCountRefMatch, (snapshot) => {
+          const data = snapshot.val();
+          setMatch(data);
+        });
+        const starCountRefChat = ref(realtime, `${user.uid}/chatrooms`);
+        onValue(starCountRefChat, (snapshot) => {
+          const data = snapshot.val();
+          setchatrooms(data);
+        });
+        setLoadingIndicator(false);
+      } else {
+        setLoadingIndicator(false);
+      }
     }
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -68,10 +79,10 @@ export const ContextProvider = ({ children }) => {
         setData(null);
         setLiked(null);
         setMatch(null);
+        setLoadingIndicator(false);
       }
-      setLoadingIndicator(false);
     });
-  }, [user]);
+  }, [user, userData]);
 
   // if (user) {
   //   useEffect(() => {
@@ -133,8 +144,9 @@ export const ContextProvider = ({ children }) => {
       setUserData,
       likedData,
       matchData,
+      chatrooms,
     }),
-    [user, Loading, error, userData, likedData, matchData]
+    [user, Loading, error, userData, likedData, matchData, chatrooms]
   );
 
   return (
