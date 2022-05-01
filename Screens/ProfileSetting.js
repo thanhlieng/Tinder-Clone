@@ -18,7 +18,7 @@ import React, { useState, useEffect } from "react";
 import tw from "tailwind-react-native-classnames";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import CircleCheckBox, { LABEL_POSITION } from "react-native-circle-checkbox";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../ggAuth/firebase-con";
 import Auth from "../ggAuth/Auth";
 import { useAsyncEffect } from "use-async-effect";
@@ -32,64 +32,142 @@ for (
 ) {
   picker.push(i);
 }
-
-const UserImage = ({ Imageuri }) => (
-  <View style={tw`mb-1`}>
-    <Pressable style={tw`p-2 justify-end`}>
-      {Imageuri ? (
-        <>
-          <ImageBackground
-            resizeMode="cover"
-            style={[tw`bg-green-500`, styles.LikedImage]}
-            source={{
-              uri: "" + Imageuri,
-            }}
-          ></ImageBackground>
-          <AntDesign
-            name="closecircle"
-            size={20}
-            color={"rgba(255,0,0,0.5)"}
-            style={tw`self-end absolute bg-white rounded-full`}
-          />
-        </>
-      ) : (
-        <>
-          <View
-            style={[
-              tw`border border-gray-500`,
-              styles.LikedImage,
-              { backgroundColor: "#E9E4E4" },
-            ]}
-          ></View>
-          <AntDesign
-            name="pluscircle"
-            size={20}
-            color={"rgba(255,0,0,0.5)"}
-            style={tw`self-end absolute bg-white rounded-full`}
-          />
-        </>
-      )}
-    </Pressable>
-  </View>
-);
-
-function renderEmpty(a) {
-  var array = [];
-  for (let i = a + 1; i <= 6; i++) {
-    array.push("");
-  }
-  return array.map((item, index) => (
-    <View key={index}>
-      <UserImage Imageuri={item[index]} />
-    </View>
-  ));
-}
-
 const ProfileSetting = () => {
   const { user, userData, setUserData } = Auth();
-  const [datas, setDatas] = useState(userData);
   const [loading, setLoading] = useState(true);
+  const [datas, setDatas] = useState(userData);
   const [images, setImages] = useState(userData.image);
+  const [imageUri, setImage] = useState();
+
+  const pickImage = async () => {
+    let permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      alert("Permission to access camera roll is required!");
+      return;
+    }
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [3, 4],
+      quality: 1,
+      exif: true,
+      base64: true,
+    });
+    console.log(result);
+
+    if (!result.cancelled) {
+      return result.uri;
+    }
+  };
+
+  async function uploadImageAsync(uri) {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+    const storage = getStorage();
+    const fileName = nanoid();
+    const imageRef = storageRef(storage, `${user.uid}/images/${fileName}.jpeg`);
+    const snapshot = await uploadBytes(imageRef, blob, {
+      contentType: "image/jpeg",
+    });
+
+    // We're done with the blob, close and release it
+    blob.close();
+
+    const url = await getDownloadURL(snapshot.ref);
+
+    return url;
+  }
+
+  function UpdateUserdata(uri) {
+    updateDoc(doc(db, "userDatas", user.uid), {
+      image: [...images, uri],
+      timestamp: serverTimestamp(),
+    })
+      .then(() => {
+        console.log("success");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  const deleteImage = (uri) => {
+    console.log("delete" + uri);
+  };
+
+  const addImage = () => {
+    const uri = pickImage();
+  };
+
+  const UserImage = ({ Imageuri }) => (
+    <View style={tw`mb-1`}>
+      <View style={tw` p-2`}>
+        {Imageuri ? (
+          <>
+            <TouchableOpacity
+              style={tw`justify-end`}
+              onPress={() => deleteImage(Imageuri)}
+            >
+              <ImageBackground
+                resizeMode="cover"
+                style={[tw`bg-green-500`, styles.LikedImage]}
+                source={{
+                  uri: "" + Imageuri,
+                }}
+              ></ImageBackground>
+              <AntDesign
+                name="closecircle"
+                size={20}
+                color={"rgba(255,0,0,0.5)"}
+                style={tw`self-end absolute bg-white rounded-full`}
+              />
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={[
+                tw`border border-gray-500 justify-end`,
+                styles.LikedImage,
+                { backgroundColor: "#E9E4E4" },
+              ]}
+              onPress={() => addImage()}
+            >
+              <AntDesign
+                name="pluscircle"
+                size={20}
+                color={"rgba(255,0,0,0.5)"}
+                style={tw`self-end absolute bg-white rounded-full`}
+              />
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
+    </View>
+  );
+
+  function renderEmpty(a) {
+    var array = [];
+    for (let i = a + 1; i <= 6; i++) {
+      array.push("");
+    }
+    return array.map((item, index) => (
+      <View key={index}>
+        <UserImage Imageuri={item[index]} />
+      </View>
+    ));
+  }
 
   // useEffect(() => {
   //   async function fetchUser() {
@@ -121,12 +199,12 @@ const ProfileSetting = () => {
           <ActivityIndicator />
         ) : (
           <View style={[styles.imageContain, tw``]}>
-            {datas.image.map((item, index) => (
+            {images.map((item, index) => (
               <View key={index}>
                 <UserImage Imageuri={item} />
               </View>
             ))}
-            {/* {images.length < 6 ? renderEmpty(images.length) : {}} */}
+            {images.length < 6 ? renderEmpty(images.length) : {}}
           </View>
         )}
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   View,
@@ -28,6 +28,7 @@ import {
 } from "firebase/database";
 import { db } from "../ggAuth/firebase-con";
 import { doc, getDoc } from "firebase/firestore";
+import { async } from "@firebase/util";
 
 const Message = ({ navigation }) => {
   const { width, height } = useWindowDimensions();
@@ -41,6 +42,7 @@ const Message = ({ navigation }) => {
   let matchMessage = [];
 
   console.log(chatrooms);
+  console.log(matchData);
 
   const fetchData = async (data) => {
     const snap = await getDoc(doc(db, "userDatas", data));
@@ -48,13 +50,16 @@ const Message = ({ navigation }) => {
     setmatchingDataAvt([...matchingDataAvt, snap.data()]);
   };
 
-  const fetchMess = async (data) => {
-    const database = getDatabase();
-    const starCountRefMess = ref(database, `chatrooms/${data}`);
-    onValue(starCountRefMess, (snapshot) => {
-      const dataS = snapshot.val();
-      setmatchingDataMess([...matchingDataMess, dataS]);
-      setmatchingDataMessage([...matchingDataMessage, dataS]);
+  const chatRow = async (uri) => {
+    const realtime = getDatabase();
+    onValue(ref(realtime, `chatrooms/${uri}`), (snapshot) => {
+      const data = snapshot.val();
+      const datauser =
+        data.firstUser._id === user.uid ? data.secondUser : data.firstUser;
+      datauser.message = data.messages[data.messages.length - 1].text;
+      datauser.chatRoomid = uri;
+      setmatchingDataMess([...matchingDataMess, datauser]);
+      setmatchingDataMessage([...matchingDataMessage, datauser]);
     });
   };
 
@@ -66,16 +71,18 @@ const Message = ({ navigation }) => {
         }
       });
     }
-    async function getMessdata() {
+    async function getchatRow() {
       chatrooms.forEach((data) => {
-        fetchMess(data);
+        chatRow(data);
       });
     }
     getMatchingData();
-    // getMessdata();
+    getchatRow();
     setLoading(false);
-  }, [matchData]);
+  }, [matchData, chatrooms]);
 
+  console.log(matchingDataMess);
+  console.log(matchingData);
   const AvtItem = ({ title }) => {
     return (
       <TouchableOpacity
@@ -121,73 +128,7 @@ const Message = ({ navigation }) => {
     );
   };
 
-  const MessItem = ({ title, message }) => (
-    <TouchableOpacity
-      style={{ marginBottom: 15 }}
-      onPress={() =>
-        navigation.navigate("Chat", {
-          matchId: "P1TXITCftqaz5jzkkaAMssPW0Tm1",
-          chatroomsId: "-N04NR99YhtDfLKiz2vj",
-          image:
-            "https://firebasestorage.googleapis.com/v0/b/rn-app-59deb.appspot.com/o/P1TXITCftqaz5jzkkaAMssPW0Tm1%2Fimages%2FOADt4NjWtmIl-1sacz0t0.jpeg?alt=media&token=7f472022-02e6-4f89-a5a3-290d20b71d66",
-          name: "yhuhjh",
-        })
-      }
-    >
-      <View style={[styles.messItem, {}]}>
-        <Image
-          resizeMode="cover"
-          style={[
-            tw`self-center rounded-full`,
-            { width: width * 0.17, height: width * 0.17 },
-          ]}
-          source={require("../rose.jpg")}
-        />
-        <View style={[tw`ml-2 flex-1 justify-evenly  border-b`, styles.aloalo]}>
-          <Text style={tw` font-bold text-base`}>{title}</Text>
-          <Text style={[tw``, { color: "rgba(0, 0, 0, 0.7)" }]}>{message}</Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
-
   const [text, setText] = useState("");
-  const [data, setData] = useState([
-    { id: "1", title: "First" },
-    { id: "2", title: "Second" },
-    { id: "3", title: "Third" },
-    { id: "4", title: "Fourth" },
-  ]);
-
-  const [dataOriginal, setOri] = useState([
-    { id: "1", title: "First" },
-    { id: "2", title: "Second" },
-    { id: "3", title: "Third" },
-    { id: "4", title: "Fourth" },
-  ]);
-
-  const [dataa, setDataa] = useState([
-    { id: "1", title: "First", message: "oke em" },
-    { id: "2", title: "Second", message: "oke em" },
-    { id: "3", title: "Third", message: "oke em" },
-    { id: "4", title: "Fourth", message: "oke em" },
-    { id: "5", title: "Fourth", message: "oke em" },
-    { id: "6", title: "Fourth", message: "oke em" },
-    { id: "7", title: "Fourth", message: "oke em" },
-    { id: "8", title: "Fourth", message: "oke em" },
-  ]);
-
-  const [dataOriginall, setOril] = useState([
-    { id: "1", title: "First", message: "oke em" },
-    { id: "2", title: "Second", message: "oke em" },
-    { id: "3", title: "Third", message: "oke em" },
-    { id: "4", title: "Fourth", message: "oke em" },
-    { id: "5", title: "Fourth", message: "oke em" },
-    { id: "6", title: "Fourth", message: "oke em" },
-    { id: "7", title: "Fourth", message: "oke em" },
-    { id: "8", title: "Fourth", message: "oke em" },
-  ]);
-
   const handleSearch = (text) => {
     if (text) {
       const newData = matchingData.reverse().filter(function (item) {
@@ -199,23 +140,16 @@ const Message = ({ navigation }) => {
       });
 
       setmatchingData(newData);
-      setDataa(newData);
+      setmatchingDataMess(newData);
       setText(text);
     } else {
       setmatchingData(matchingDataAvt);
-      setDataa(dataOriginall);
+      setmatchingDataMess(matchingDataMessage);
       setText(text);
     }
   };
 
-  // const realtime = getDatabase();
-  // const starCountRef = ref(realtime, `${user.uid}/match`);
-  // console.log(starCountRef);
-  // onValue(starCountRef, (snapshot) => {
-  //   const data = snapshot.val();
-  //   Matchdata = data;
-  // });
-
+  // const renderMess = ({ item }) => <chatmessItem data={item} />;
   const renderItem = ({ item }) => <AvtItem title={item} />;
 
   return (
@@ -272,26 +206,64 @@ const Message = ({ navigation }) => {
               clearButtonMode="always"
             />
           </View>
-          <View>
-            <ScrollView
+          <View style={styles.ScrollViewContainer}>
+            {/* <ScrollView
               style={styles.ScrollViewContainer}
               showsVerticalScrollIndicator={false}
-            >
-              <Text style={tw`font-bold pb-2`}>Tương hợp</Text>
-              <FlatList
+            > */}
+            <Text style={tw`font-bold pb-2`}>Tương hợp</Text>
+            {/* <FlatList
                 data={matchingData.reverse()}
                 renderItem={renderItem}
                 keyExtractor={(item) => item}
                 horizontal={true}
                 showsHorizontalScrollIndicator={false}
-              />
-              <Text style={tw`font-bold pt-2 pb-4`}>Tin nhắn</Text>
-              {dataa.map((item, index) => (
-                <View key={index}>
-                  <MessItem title={item.title} message={item.message} />
-                </View>
-              ))}
-            </ScrollView>
+              /> */}
+            <Text style={tw`font-bold pt-2 pb-4`}>Tin nhắn</Text>
+            <View>
+              <FlatList
+                data={matchingDataMess}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={{ marginBottom: 15 }}
+                    onPress={() =>
+                      navigation.navigate("Chat", {
+                        matchId: item._id,
+                        chatroomsId: item.chatRoomid,
+                        image: item._image,
+                        name: item._name,
+                      })
+                    }
+                  >
+                    <View style={[styles.messItem, {}]}>
+                      <Image
+                        resizeMode="cover"
+                        style={[
+                          tw`self-center rounded-full`,
+                          { width: width * 0.17, height: width * 0.17 },
+                        ]}
+                        source={{ uri: item._image }}
+                      />
+                      <View
+                        style={[
+                          tw`ml-2 flex-1 justify-evenly  border-b`,
+                          styles.aloalo,
+                        ]}
+                      >
+                        <Text style={tw` font-bold text-base`}>
+                          {item._name}
+                        </Text>
+                        <Text style={[tw``, { color: "rgba(0, 0, 0, 0.7)" }]}>
+                          {item.message}
+                        </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                )}
+                keyExtractor={(item) => item}
+              ></FlatList>
+            </View>
+            {/* </ScrollView> */}
           </View>
         </View>
       )}

@@ -154,8 +154,12 @@ export default function Chat({ route, navigation }) {
     messages[0].createdAt = serverTimestamp();
     messages[0]._seen = false;
     const newChatroomRef = push(ref(database, "chatrooms"), {
-      firstUser: user.uid,
-      secondUser: matchId,
+      firstUser: {
+        _id: userData.id,
+        _name: userData.userName,
+        _image: userData.image[0],
+      },
+      secondUser: { _id: matchId, _name: name, _image: image },
       messages: messages,
       lastUpdate: serverTimestamp(),
     });

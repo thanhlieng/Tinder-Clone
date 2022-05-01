@@ -48,27 +48,22 @@ export const ContextProvider = ({ children }) => {
     async function fetchUserdata() {
       const snap = await getDoc(doc(db, "userDatas", user.uid));
       setData(snap.data());
-      if (snap.data()) {
-        const realtime = getDatabase();
-        const starCountReffLike = ref(realtime, `${user.uid}/liked`);
-        onValue(starCountReffLike, (snapshot) => {
-          const data = snapshot.val();
-          setLiked(data);
-        });
-        const starCountRefMatch = ref(realtime, `${user.uid}/match`);
-        onValue(starCountRefMatch, (snapshot) => {
-          const data = snapshot.val();
-          setMatch(data);
-        });
-        const starCountRefChat = ref(realtime, `${user.uid}/chatrooms`);
-        onValue(starCountRefChat, (snapshot) => {
-          const data = snapshot.val();
-          setchatrooms(data);
-        });
-        setLoadingIndicator(false);
-      } else {
-        setLoadingIndicator(false);
-      }
+      const realtime = getDatabase();
+      const starCountReffLike = ref(realtime, `${user.uid}/liked`);
+      onValue(starCountReffLike, (snapshot) => {
+        const data = snapshot.val();
+        setLiked(data);
+      });
+      const starCountRefMatch = ref(realtime, `${user.uid}/match`);
+      onValue(starCountRefMatch, (snapshot) => {
+        const data = snapshot.val();
+        setMatch(data);
+      });
+      const starCountRefChat = ref(realtime, `${user.uid}/chatrooms`);
+      onValue(starCountRefChat, (snapshot) => {
+        const data = snapshot.val();
+        setchatrooms(data);
+      });
     }
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -79,10 +74,10 @@ export const ContextProvider = ({ children }) => {
         setData(null);
         setLiked(null);
         setMatch(null);
-        setLoadingIndicator(false);
       }
+      setLoadingIndicator(false);
     });
-  }, [user, userData]);
+  }, [user]);
 
   // if (user) {
   //   useEffect(() => {
