@@ -25,7 +25,7 @@ import {
   push,
 } from "firebase/database";
 
-const Matched = ({ route, navigation: { goBack } }) => {
+const Matched = ({ route, navigation: { goBack }, navigation }) => {
   const { user, userData } = Auth();
   const { matchId } = route.params;
   const { height, width } = useWindowDimensions();
@@ -48,32 +48,6 @@ const Matched = ({ route, navigation: { goBack } }) => {
         });
       const snap = await getDoc(doc(db, "userDatas", matchId));
       setmatchData(snap.data());
-      const newChatroomRef = push(ref(database, "chatrooms"), {
-        firstUser: user.uid,
-        secondUser: matchId,
-        messages: [],
-        lastUpdate: new Date(),
-      });
-      get(ref(database, `${matchId}/chatrooms`))
-        .then((snapshot) => {
-          const chatRoomId = snapshot.val();
-          update(ref(database, `${matchId}`), {
-            chatrooms: [...chatRoomId, newChatroomRef.key],
-          });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-      get(ref(database, `${user.uid}/chatrooms`))
-        .then((snapshot) => {
-          const chatRoomId = snapshot.val();
-          update(ref(database, `${user.uid}`), {
-            chatrooms: [...chatRoomId, newChatroomRef.key],
-          });
-        })
-        .catch((error) => {
-          console.error(error);
-        });
       get(ref(database, `${user.uid}/match`))
         .then((snapshot) => {
           const usermatchData = snapshot.val();
@@ -94,8 +68,6 @@ const Matched = ({ route, navigation: { goBack } }) => {
         .catch((error) => {
           console.error(error);
         });
-      console.log(newChatroomRef.key);
-      setchatroom(newChatroomRef.key);
       setLoading(false);
     }
     fetchUser();
@@ -141,7 +113,16 @@ const Matched = ({ route, navigation: { goBack } }) => {
               <TouchableOpacity onPress={() => goBack()}>
                 <Text style={tw`text-white text-lg`}>Keep Swipping</Text>
               </TouchableOpacity>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("Chat", {
+                    matchId: matchData.id,
+                    chatroomsId: null,
+                    image: matchData.image[0],
+                    name: matchData.userName,
+                  })
+                }
+              >
                 <Text style={tw`text-white pt-10 text-lg`}>
                   Send message imidiately
                 </Text>

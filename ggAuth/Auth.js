@@ -13,7 +13,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth, db } from "../ggAuth/firebase-con";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import {
   getDatabase,
   ref,
@@ -46,8 +46,11 @@ export const ContextProvider = ({ children }) => {
 
   useEffect(() => {
     async function fetchUserdata() {
-      const snap = await getDoc(doc(db, "userDatas", user.uid));
-      setData(snap.data());
+      // const snap = await getDoc(doc(db, "userDatas", user.uid));
+      // setData(snap.data());
+      const unsub = onSnapshot(doc(db, "userDatas", user.uid), (doc) => {
+        setData(doc.data());
+      });
       const realtime = getDatabase();
       const starCountReffLike = ref(realtime, `${user.uid}/liked`);
       onValue(starCountReffLike, (snapshot) => {

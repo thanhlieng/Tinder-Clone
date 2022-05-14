@@ -143,7 +143,7 @@ const ModalProfile = () => {
 
   const pickImage = async () => {
     let permissionResult =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
+      await ImagePicker.requestCameraRollPermissionsAsync();
     if (permissionResult.granted === false) {
       alert("Permission to access camera roll is required!");
       return;

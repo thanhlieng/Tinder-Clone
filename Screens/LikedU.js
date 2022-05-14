@@ -16,7 +16,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../ggAuth/firebase-con";
 
 const LikedU = ({ navigation }) => {
-  const { height, width } = useWindowDimensions();
+  const { height, width, fontScale } = useWindowDimensions();
   const { user, userData, likedData } = Auth();
 
   const LikedItem = ({ uri }) => {
@@ -91,7 +91,10 @@ const LikedU = ({ navigation }) => {
         </Pressable>
       </View>
       <Text
-        style={tw`text-lg font-semibold border-b pb-4 w-full text-center border-pink-600 `}
+        style={[
+          tw` font-semibold border-b pb-4 w-full text-center border-pink-600 `,
+          { fontSize: 18 / fontScale },
+        ]}
       >
         Đã thích bạn
       </Text>

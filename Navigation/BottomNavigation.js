@@ -1,27 +1,25 @@
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Fontisto from "react-native-vector-icons/Fontisto";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import React, { useState } from "react";
 import Home from "../Screens/Home";
 import Message from "../Screens/Message";
 import Matched from "../Screens/Matched";
-import Home1 from "../Screens/Home1";
-import { getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import ModalProfile from "../Screens/ModalProfile";
 import LikedU from "../Screens/LikedU";
 import UserProfile from "../Screens/UserProfile";
 import ProfileSetting from "../Screens/ProfileSetting";
 import Setting from "../Screens/Setting";
-import { Navigation, NavigationMessage } from "../Navigation/Navigation";
-import { View } from "react-native";
 import Auth from "../ggAuth/Auth";
 import Login from "../Screens/Login";
-import { ScreenStackHeaderLeftView } from "react-native-screens";
 import { useWindowDimensions } from "react-native";
 import Chat from "../Screens/Chat";
+import { PixelRatio } from "react-native";
+import chat1 from "../Screens/chat1";
 
 const BottomNavigationTab = createMaterialBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -72,7 +70,11 @@ function BottomTabs() {
         options={{
           tabBarLabel: "LikeU",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="heart" color={color} size={26} />
+            <FontAwesome
+              name="heartbeat"
+              color={color}
+              size={PixelRatio.getPixelSizeForLayoutSize(12)}
+            />
           ),
         }}
       />
@@ -82,17 +84,25 @@ function BottomTabs() {
         options={({ route }) => ({
           tabBarLabel: "Home",
           tabBarIcon: ({ color }) => (
-            <Fontisto name="tinder" color={color} size={30} />
+            <Fontisto
+              name="tinder"
+              color={color}
+              size={PixelRatio.getPixelSizeForLayoutSize(12)}
+            />
           ),
         })}
       />
       <Tab.Screen
-        name="Matched"
+        name="Message"
         component={Message}
         options={{
           tabBarLabel: "Match",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="chatbubbles" color={color} size={26} />
+            <MaterialCommunityIcons
+              name="chat-outline"
+              color={color}
+              size={PixelRatio.getPixelSizeForLayoutSize(12)}
+            />
           ),
         }}
       />
@@ -116,7 +126,7 @@ function HomeNav() {
       <Stack.Screen name="User" component={UserProfile} />
       <Stack.Screen name="profile" component={ProfileSetting} />
       <Stack.Screen name="setting" component={Setting} />
-      <Stack.Screen name="Chat" component={Chat} />
+      <Stack.Screen name="Chat" component={chat1} />
     </Stack.Navigator>
   );
 }

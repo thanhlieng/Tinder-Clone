@@ -6,6 +6,8 @@ import {
   StatusBar,
   Image,
   Pressable,
+  PixelRatio,
+  useWindowDimensions,
 } from "react-native";
 import React from "react";
 import tw from "tailwind-react-native-classnames";
@@ -17,6 +19,7 @@ import Auth from "../ggAuth/Auth";
 const UserProfile = ({ navigation }) => {
   const { userData } = Auth();
   const fullYear = new Date();
+  const { height, width, fontScale } = useWindowDimensions();
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.viewContain}>
@@ -24,9 +27,12 @@ const UserProfile = ({ navigation }) => {
           <Image
             source={{ uri: "" + userData.image[0] }}
             resizeMode="cover"
-            style={styles.userImage}
+            style={[
+              styles.userImage,
+              { width: width * 0.35, height: width * 0.35 },
+            ]}
           />
-          <Text style={tw`font-bold text-xl mt-1`}>
+          <Text style={[tw`font-bold mt-1`, { fontSize: 20 / fontScale }]}>
             {userData.userName}, {fullYear.getFullYear() - userData.birthYear}
           </Text>
         </View>
@@ -36,10 +42,10 @@ const UserProfile = ({ navigation }) => {
               <FontAwesome
                 name="user-circle-o"
                 color="gray"
-                size={30}
+                size={PixelRatio.getPixelSizeForLayoutSize(15)}
                 style={styles.icon}
               />
-              <Text>Chỉnh sửa hồ sơ</Text>
+              <Text style={{ fontSize: 15 / fontScale }}>Chỉnh sửa hồ sơ</Text>
             </View>
           </Pressable>
           <Pressable onPress={() => navigation.navigate("setting")}>
@@ -47,10 +53,10 @@ const UserProfile = ({ navigation }) => {
               <AntDesign
                 name="setting"
                 color="gray"
-                size={30}
+                size={PixelRatio.getPixelSizeForLayoutSize(15)}
                 style={styles.icon}
               />
-              <Text>Thiết lập chung</Text>
+              <Text style={{ fontSize: 15 / fontScale }}>Thiết lập chung</Text>
             </View>
           </Pressable>
         </View>
@@ -92,8 +98,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   userImage: {
-    width: 150,
-    height: 150,
     borderRadius: 9999,
     borderColor: "pink",
     borderWidth: 2,

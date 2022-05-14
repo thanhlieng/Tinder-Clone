@@ -11,10 +11,12 @@ import {
   Pressable,
   useWindowDimensions,
   ActivityIndicator,
+  PixelRatio,
 } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import tw from "tailwind-react-native-classnames";
 import Feather from "react-native-vector-icons/Feather";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Auth from "../ggAuth/Auth";
 import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
@@ -29,6 +31,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native-gesture-handler";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import Foundation from "react-native-vector-icons/Foundation";
 import Carousel, { Pagination } from "react-native-snap-carousel";
 import {
   collection,
@@ -58,7 +61,7 @@ function* range(start, end) {
 }
 
 const Home = ({ navigation }) => {
-  const { height, width } = useWindowDimensions();
+  const { height, width, fontScale } = useWindowDimensions();
   const [cardIndex, setcardIndex] = useState(0);
   const { user, Logout, userData, likedData } = Auth();
   const pressedRed = useSharedValue(false);
@@ -66,20 +69,8 @@ const Home = ({ navigation }) => {
   const Swiperef = useRef(null);
   const Carouselref = useRef(null);
   const [dotindex, setIndex] = useState(0);
-  const [carouselWidth, setcarouselWidth] = useState(100);
-  const [carouselHeight, setcarouselHeight] = useState(100);
   const [allData, setDataFetched] = useState([]);
   const [loading, setloading] = useState(true);
-  const onLayout = (event) => {
-    const { x, y, height, width } = event.nativeEvent.layout;
-    setcarouselWidth(width);
-  };
-  const layoutA = (event) => {
-    const { x, y, height, width } = event.nativeEvent.layout;
-    setcarouselHeight(height);
-  };
-
-  let Likeddata = [];
 
   const fullYear = new Date();
   const tabBarHeight = useBottomTabBarHeight();
@@ -101,18 +92,6 @@ const Home = ({ navigation }) => {
   ];
 
   useEffect(() => {
-    // async function fetchUser() {
-    //   const q = query(collection(db, "userDatas"));
-    //   const querySnapshot = await getDocs(q);
-    //   setDataFetched(
-    //     querySnapshot.forEach((doc) => ({
-    //       id: doc.id,
-    //       ...doc.data(),
-    //       // doc.data() is never undefined for query doc snapshots
-    //     }))
-    //   );
-    //   setloading(false);
-    // }
     let sub;
     const fetchUser = async () => {
       sub = onSnapshot(collection(db, "userDatas"), (snapshot) => {
@@ -125,15 +104,7 @@ const Home = ({ navigation }) => {
         setloading(false);
       });
     };
-    // function alo() {
-    //   setloading(false);
-    // }
-    // querySnapshot.forEach((doc) => {
-    //   // doc.data() is never undefined for query doc snapshots
-    //   console.log(doc.id, " => ", doc.data());
-    // });
     fetchUser();
-    // alo();
     return sub;
   }, []);
 
@@ -203,7 +174,8 @@ const Home = ({ navigation }) => {
     );
   };
 
-  const renderCard = (card, index) => {
+  function RenderCard(card, index) {
+    let dotindex = 0;
     return (
       <View style={[styles.card, { height: height * 0.85 }]} key={index}>
         <Carousel
@@ -216,7 +188,7 @@ const Home = ({ navigation }) => {
           inactiveSlideShift={0}
           useScrollView={true}
           scrollEnabled={false}
-          onSnapToItem={(index) => setIndex(index)}
+          onSnapToItem={(index) => (activeDotIndex = { index })}
           style={tw`bg-red-500`}
         />
         <Pagination
@@ -248,17 +220,19 @@ const Home = ({ navigation }) => {
           dotsLength={imagedata.length}
         />
         <View style={[tw`absolute bottom-0 w-full`, { height: "20%" }]}>
-          <Text style={tw`font-bold text-lg ml-5 text-white`}>
+          <Text
+            style={[
+              tw`font-bold ml-5 text-white`,
+              { fontSize: 20 / fontScale },
+            ]}
+          >
             {allData[index].userName}{" "}
             {fullYear.getFullYear() - allData[index].birthYear}
           </Text>
-          <Feather name="map-pin" size={15} style={tw`ml-5 text-white`}>
-            <Text> Cach xa 8km</Text>
-          </Feather>
         </View>
       </View>
     );
-  };
+  }
 
   const lefteventHandler = useAnimatedGestureHandler({
     onStart: (event, ctx) => {
@@ -340,7 +314,7 @@ const Home = ({ navigation }) => {
             backgroundColor={"#F2F2F2"}
             cards={allData}
             cardIndex={0}
-            renderCard={renderCard}
+            renderCard={RenderCard}
             verticalSwipe={false}
             cardVerticalMargin={0}
             cardHorizontalMargin={width * 0.01}
@@ -390,46 +364,49 @@ const Home = ({ navigation }) => {
             }}
           >
             <GestureHandlerRootView
-              style={tw`absolute bottom-0 flex-row justify-around w-full`}
+              style={tw`absolute bottom-0 flex-row justify-around w-full items-end`}
             >
               <TapGestureHandler onGestureEvent={lefteventHandler}>
-                <Animated.View
-                  style={[
-                    tw`rounded-full bg-white w-12 h-12 self-end`,
-                    leftTouchAnimation,
-                  ]}
-                >
+                <Animated.View style={[tw`rounded-full `, leftTouchAnimation]}>
                   <TouchableWithoutFeedback
                     onPress={() => Swiperef.current.swipeLeft()}
-                    style={tw`w-12 h-12 justify-center rounded-full border-red-500 border-2 bg-transparent`}
+                    style={[
+                      tw` justify-center rounded-full border-red-500 border-2 `,
+                      {
+                        width: PixelRatio.getPixelSizeForLayoutSize(19),
+                        height: PixelRatio.getPixelSizeForLayoutSize(19),
+                        flexWrap: "wrap-reverse",
+                      },
+                    ]}
                   >
-                    <Ionicons
-                      style={tw`self-center`}
-                      name="md-close"
+                    <MaterialCommunityIcons
+                      style={tw`self-center absolute`}
+                      name="window-close"
                       color={"red"}
-                      size={40}
+                      size={PixelRatio.getPixelSizeForLayoutSize(18)}
                     />
                   </TouchableWithoutFeedback>
                 </Animated.View>
               </TapGestureHandler>
               <TapGestureHandler onGestureEvent={righteventHandler}>
-                <Animated.View
-                  style={[
-                    tw`rounded-full bg-transparent w-12 h-12 self-end`,
-                    rightTouchAnimation,
-                  ]}
-                >
+                <Animated.View style={[tw`rounded-full `, rightTouchAnimation]}>
                   <TouchableWithoutFeedback
                     onPress={() => {
                       Swiperef.current.swipeRight();
                     }}
-                    style={tw`w-12 h-12 justify-center rounded-full border-green-500 border-2 bg-transparent`}
+                    style={[
+                      tw`justify-center rounded-full border-green-500 border-2 bg-transparent`,
+                      {
+                        width: PixelRatio.getPixelSizeForLayoutSize(19),
+                        height: PixelRatio.getPixelSizeForLayoutSize(19),
+                      },
+                    ]}
                   >
-                    <Ionicons
-                      style={tw`self-center `}
+                    <Foundation
+                      style={tw`self-center absolute`}
                       name="heart"
                       color={"green"}
-                      size={40}
+                      size={PixelRatio.getPixelSizeForLayoutSize(18)}
                     />
                   </TouchableWithoutFeedback>
                 </Animated.View>
@@ -444,9 +421,8 @@ const Home = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "transparent",
-    marginTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    marginTop: StatusBar.currentHeight,
     justifyContent: "center",
     alignContent: "center",
   },
