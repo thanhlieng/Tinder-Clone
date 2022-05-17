@@ -6,5 +6,6 @@
 - Database: firebase
 ## ScreenShot
   - # Android
-    ![android](/repository/Screenshots/android-home.png?raw=true "Tinder Home")
+<img src="/Screenshots/android-home.png" height="400" width="20%" >      <img src="/Screenshots/android-profile.png" height="400" width="200" >         <img src="/Screenshots/android-Like.png" height="400" width="200" >        <img src="/Screenshots/android-message.png" height="400" width="200" >
+
   - # IOS
