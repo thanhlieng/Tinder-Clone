@@ -16,6 +16,9 @@ import {
   PixelRatio,
   TouchableOpacity,
   TouchableHighlight,
+  Modal,
+  ToastAndroid,
+  Ale,
 } from "react-native";
 LogBox.ignoreAllLogs();
 import React, { useState, useEffect } from "react";
@@ -41,6 +44,7 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { nanoid } from "nanoid";
+import RNPickerSelect from "react-native-picker-select";
 
 const fullYear = new Date();
 const picker = [];
@@ -49,7 +53,8 @@ for (
   i > fullYear.getFullYear() - 16 - 34;
   i--
 ) {
-  picker.push(i);
+  const ob = { label: "" + i, value: i };
+  picker.push(ob);
 }
 const ProfileSetting = () => {
   const { user, userData, setUserData } = Auth();
@@ -58,6 +63,7 @@ const ProfileSetting = () => {
   const [images, setImages] = useState(userData.image);
   const [uploadedUri, setuploaded] = useState([]);
   const { height, width, fontScale } = useWindowDimensions();
+  const [modalVisible, setModalVisible] = useState(false);
 
   const pickImage = async () => {
     let permissionResult =
@@ -263,11 +269,8 @@ const ProfileSetting = () => {
   };
 
   const updateUserdata = async () => {
+    setModalVisible(true);
     const uris = await dataImageControl();
-    setDatas((prevState) => ({
-      ...prevState,
-      image: uris,
-    }));
     setDoc(doc(db, "userDatas", user.uid), {
       id: user.uid,
       userName: datas.userName,
@@ -279,6 +282,12 @@ const ProfileSetting = () => {
     })
       .then(() => {
         console.log("success");
+        setModalVisible(false);
+        if (Platform.OS === "android") {
+          ToastAndroid.show("Success !", ToastAndroid.SHORT);
+        } else {
+          AlertIOS.alert("Success !");
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -287,8 +296,36 @@ const ProfileSetting = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(255,255,255,0.5)",
+            justifyContent: "center",
+          }}
+        >
+          <ActivityIndicator
+            animating={true}
+            size="large"
+            style={{ opacity: 1 }}
+            color="#FFB6C1"
+          />
+        </View>
+      </Modal>
       {loading ? (
-        <ActivityIndicator size={"large"} />
+        <ActivityIndicator
+          animating={true}
+          size="large"
+          style={{ opacity: 1 }}
+          color="#999999"
+        />
       ) : (
         <ScrollView>
           {!images ? (
@@ -367,20 +404,21 @@ const ProfileSetting = () => {
             <Text style={[styles.textProfile, { fontSize: 17 / fontScale }]}>
               Năm sinh
             </Text>
-            <Picker
-              selectedValue={datas.birthYear}
-              style={[{ height: 50, width: "90%" }, tw`ml-5`]}
-              onValueChange={(itemValue, itemIndex) =>
+
+            <RNPickerSelect
+              placeholder={{}}
+              items={picker}
+              onValueChange={(value) => {
                 setDatas((prevState) => ({
                   ...prevState,
-                  birthYear: itemValue,
-                }))
-              }
-            >
-              {picker.map((item, index) => (
-                <Picker.Item key={index} label={"" + item} value={item} />
-              ))}
-            </Picker>
+                  birthYear: value,
+                }));
+              }}
+              InputAccessoryView={() => null}
+              useNativeAndroidPickerStyle={false}
+              style={pickerSelectStyles}
+              value={datas.birthYear}
+            />
             <Text style={[styles.textProfile, { fontSize: 17 / fontScale }]}>
               Mô tả
             </Text>
@@ -451,6 +489,31 @@ export const styles = StyleSheet.create({
   textInput: {
     borderColor: "rgba(0,0,0,0.4)",
     paddingLeft: 20,
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 5,
+    marginHorizontal: 25,
+    paddingHorizontal: 5,
+    borderWidth: 0.5,
+    borderColor: "gray",
+    borderRadius: 8,
+    color: "black",
+    paddingRight: 10,
+    justifyContent: "center", // to ensure the text is never behind the icon
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+
+    borderWidth: 0.5,
+    borderColor: "gray",
+    borderRadius: 8,
+    color: "black",
+    paddingRight: 10, // to ensure the text is never behind the icon
   },
 });
 

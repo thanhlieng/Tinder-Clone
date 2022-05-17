@@ -94,15 +94,14 @@ const Home = ({ navigation }) => {
   useEffect(() => {
     let sub;
     const fetchUser = async () => {
-      sub = onSnapshot(collection(db, "userDatas"), (snapshot) => {
-        setDataFetched(
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-        );
-        setloading(false);
+      const querySnapshot = await getDocs(collection(db, "userDatas"));
+      querySnapshot.forEach((doc) => {
+        // doc.data() is never undefined for query doc snapshots
+        if (doc.data().id !== user.uid) {
+          setDataFetched((prev) => [...prev, doc.data()]);
+        }
       });
+      setloading(false);
     };
     fetchUser();
     return sub;
@@ -149,19 +148,29 @@ const Home = ({ navigation }) => {
     });
   };
 
+  console.log(allData);
+
   const renderImage = ({ item, index }) => {
     return (
-      <View key={index} style={{ height: height * 0.85 }}>
-        <ImageBackground
+      <View
+        key={index}
+        style={{
+          justifyContent: "center",
+          backgroundColor: "white",
+        }}
+      >
+        <Image
           source={{ uri: "" + item }}
-          style={tw`top-0 h-full w-full rounded-full`}
+          style={[tw`h-full w-full`, { borderRadius: 10 }]}
           resizeMode="stretch"
-        >
-          <LinearGradient
-            colors={["transparent", "black"]}
-            style={[tw`absolute bottom-0 w-full`, { height: "25%" }]}
-          ></LinearGradient>
-        </ImageBackground>
+        ></Image>
+        <LinearGradient
+          colors={["transparent", "black"]}
+          style={[
+            tw`absolute bottom-0 self-center`,
+            { height: "25%", width: width * 0.98, borderRadius: 10 },
+          ]}
+        ></LinearGradient>
         <Pressable
           style={[tw`absolute h-full right-0`, { width: "30%" }]}
           onPress={() => Carouselref.current.snapToNext()}
@@ -174,50 +183,59 @@ const Home = ({ navigation }) => {
     );
   };
 
-  function RenderCard(card, index) {
-    let dotindex = 0;
+  const RenderCard = ({ card }) => {
+    console.log(card);
+    const [dotindex, setdotIndex] = useState(0);
+    if (card.id === user.uid) {
+      return null;
+    }
     return (
-      <View style={[styles.card, { height: height * 0.85 }]} key={index}>
+      <View
+        style={[
+          styles.card,
+          { height: Platform.OS === "android" ? height * 0.8 : height * 0.75 },
+        ]}
+      >
         <Carousel
           layout="tinder"
           ref={Carouselref}
-          data={allData[index].image}
+          data={card.image}
           sliderWidth={width * 0.98}
           itemWidth={width * 0.98}
           renderItem={renderImage}
           inactiveSlideShift={0}
           useScrollView={true}
           scrollEnabled={false}
-          onSnapToItem={(index) => (activeDotIndex = { index })}
+          onSnapToItem={(index) => setdotIndex(index)}
           style={tw`bg-red-500`}
         />
         <Pagination
           containerStyle={{
             position: "absolute",
             backgroundColor: "transparent",
-            right: -10,
-            top: -15,
+            right: 0,
+            top: 0,
           }}
           renderDots={(activeIndex) => (
             <View
               style={{
                 backgroundColor: "rgba(0,0,0,0.7)",
                 alignItems: "center",
-                padding: 2,
+                padding: 5,
                 borderRadius: 99999,
-                paddingLeft: 5,
-                paddingRight: 5,
+                paddingLeft: 8,
+                paddingRight: 8,
               }}
             >
               <Text
                 style={{ color: "white", fontWeight: "bold", fontSize: 15 }}
               >
-                {activeIndex + 1}/{allData[index].image.length}
+                {activeIndex + 1}/{card.image.length}
               </Text>
             </View>
           )}
           activeDotIndex={dotindex}
-          dotsLength={imagedata.length}
+          dotsLength={5}
         />
         <View style={[tw`absolute bottom-0 w-full`, { height: "20%" }]}>
           <Text
@@ -226,13 +244,12 @@ const Home = ({ navigation }) => {
               { fontSize: 20 / fontScale },
             ]}
           >
-            {allData[index].userName}{" "}
-            {fullYear.getFullYear() - allData[index].birthYear}
+            {card.userName} {fullYear.getFullYear() - card.birthYear}
           </Text>
         </View>
       </View>
     );
-  }
+  };
 
   const lefteventHandler = useAnimatedGestureHandler({
     onStart: (event, ctx) => {
@@ -274,8 +291,8 @@ const Home = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View
         style={[
-          tw`flex-row justify-evenly items-center bg-white w-full absolute top-0`,
-          { height: height * 0.055 },
+          tw`flex-row justify-evenly items-center bg-white w-full`,
+          { height: height * 0.06 },
         ]}
       >
         <Pressable
@@ -308,13 +325,24 @@ const Home = ({ navigation }) => {
       {loading ? (
         <ActivityIndicator size="large" />
       ) : (
-        <View style={[tw`bg-red-500`, { height: height * 0.85 }]}>
+        <View
+          style={[
+            tw``,
+            {
+              justifyContent: "center",
+              alignItems: "center",
+              marginTop: height * 0.02,
+              marginBottom: height * 0.02,
+              height: Platform.OS === "android" ? height * 0.8 : height * 0.75,
+            },
+          ]}
+        >
           <Swiper
             ref={Swiperef}
             backgroundColor={"#F2F2F2"}
             cards={allData}
             cardIndex={0}
-            renderCard={RenderCard}
+            renderCard={(card) => <RenderCard card={card} />}
             verticalSwipe={false}
             cardVerticalMargin={0}
             cardHorizontalMargin={width * 0.01}
@@ -429,7 +457,7 @@ const styles = StyleSheet.create({
   card: {
     borderColor: "#E8E8E8",
     justifyContent: "center",
-    backgroundColor: "green",
+    backgroundColor: "white",
   },
   text: {
     textAlign: "center",

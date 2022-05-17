@@ -20,7 +20,7 @@ const LikedU = ({ navigation }) => {
   const { user, userData, likedData } = Auth();
 
   const LikedItem = ({ uri }) => {
-    const [likeData, setlikeData] = useState();
+    const [likeDataa, setlikeData] = useState();
     const [loading, setLoading] = useState(true);
     if (uri === user.uid) {
       return null;
@@ -46,7 +46,7 @@ const LikedU = ({ navigation }) => {
               style={[
                 { width: width * 0.48, height: width * 0.6, borderRadius: 10 },
               ]}
-              source={{ uri: likeData.image[0] }}
+              source={{ uri: likeDataa.image[0] }}
               blurRadius={150}
             />
           </Pressable>

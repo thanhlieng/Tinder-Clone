@@ -12,8 +12,10 @@ import {
   Image,
   TouchableOpacity,
   useWindowDimensions,
+  ActivityIndicator,
+  Platform,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
+// import { Picker } from "@react-native-picker/picker";
 import tw from "tailwind-react-native-classnames";
 import CircleCheckBox, { LABEL_POSITION } from "react-native-circle-checkbox";
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
@@ -32,7 +34,7 @@ import Auth from "../ggAuth/Auth";
 import { useNavigation } from "@react-navigation/core";
 import { nanoid } from "nanoid";
 import "react-native-get-random-values";
-import IOSPicker from "react-native-ios-picker";
+import RNPickerSelect from "react-native-picker-select";
 
 const fullYear = new Date();
 const picker = [];
@@ -41,7 +43,8 @@ for (
   i > fullYear.getFullYear() - 16 - 34;
   i--
 ) {
-  picker.push(i);
+  const ob = { label: "" + i, value: i };
+  picker.push(ob);
 }
 
 const ModalProfile = () => {
@@ -64,6 +67,8 @@ const ModalProfile = () => {
   const [imageUri, setImage] = useState();
   const [dataAfter, setAfter] = useState();
   const [okeModal, setOkmodal] = useState(false);
+
+  const [loadingUpload, setloadingUpload] = useState(true);
   const navigation = useNavigation();
 
   async function uploadImageAsync(uri) {
@@ -132,13 +137,15 @@ const ModalProfile = () => {
   }
 
   async function uploaduserData() {
+    setOkmodal(true);
+    setloadingUpload(true);
     const uri = await uploadImageAsync(imageUri);
     // addUserdataRealtime();
     addUserdata(uri);
     addUserdataRealtime();
     const snap = await getDoc(doc(db, "userDatas", user.uid));
     setAfter(snap.data());
-    setOkmodal(true);
+    setloadingUpload(false);
   }
 
   const pickImage = async () => {
@@ -230,46 +237,41 @@ const ModalProfile = () => {
                     innerColor={"#FF0073"}
                   />
                 </View>
-                <View style={tw`flex-row ml-5 mr-5 justify-between`}>
+                <View style={tw`flex-row ml-5 mr-5 `}>
                   <Text style={tw`mt-5 ml-2.5 italic font-bold text-base`}>
                     Năm sinh
                   </Text>
-                  {Platform.OS === "android" ? (
-                    <Picker
-                      selectedValue={pickerselectedValue}
-                      style={{ height: 60, width: 110 }}
-                      onValueChange={(itemValue, itemIndex) => {
-                        setpickerSelectedValue(itemValue);
-                      }}
-                    >
-                      {picker.map((item, index) => (
-                        <Picker.Item
-                          key={index}
-                          label={"" + item}
-                          value={item}
-                        />
-                      ))}
-                    </Picker>
-                  ) : (
-                    <TextInput
-                      clearButtonMode={"while-editing"}
-                      keyboardType={"number-pad"}
-                      placeholder="Nam sinh"
-                      value={pickerselectedValue}
-                      onChangeText={(newText) =>
-                        setpickerSelectedValue(newText)
-                      }
+                  <View style={[tw`mt-5 ml-8`]}>
+                    {/* <RNPickerSelect
                       style={[
-                        tw`rounded-full border mr-5 mt-5`,
-
                         {
-                          borderColor: nameError
-                            ? "#FF0000"
-                            : "rgba(0,0,0,0.1)",
+                          backgroundColor: "green",
+                          borderWidth: 2,
+                          color: "black",
                         },
+                        tw`mt-5`,
                       ]}
-                    ></TextInput>
-                  )}
+                      placeholder={picker[0]}
+                      onValueChange={(value) => {
+                        setpickerSelectedValue(value);
+                      }}
+                      items={picker}
+                      useNativeAndroidPickerStyle={false}
+                      value={pickerselectedValue}
+                    /> */}
+
+                    <RNPickerSelect
+                      placeholder={{}}
+                      items={picker}
+                      onValueChange={(value) => {
+                        setpickerSelectedValue(value);
+                      }}
+                      InputAccessoryView={() => null}
+                      useNativeAndroidPickerStyle={false}
+                      style={pickerSelectStyles}
+                      value={pickerselectedValue}
+                    />
+                  </View>
                 </View>
                 <Text style={[styles.modalText]}>Mô tả</Text>
                 <TextInput
@@ -400,28 +402,37 @@ const ModalProfile = () => {
                 { backgroundColor: "rgba(0,0,0,0.5)" },
               ]}
             >
-              <View
-                style={[
-                  tw`justify-center bg-white items-center space-around`,
-                  {
-                    marginHorizontal: "5%",
-                    paddingVertical: "5%",
-                    paddingHorizontal: "5%",
-                  },
-                ]}
-              >
-                <Text style={tw`border-b w-fit mb-2`}>
-                  Chung mung ban da thiet lap xong ho so
-                </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    setUserData(dataAfter);
-                  }}
-                  style={[tw`w-full`, { width: "100%" }]}
+              {loadingUpload ? (
+                <ActivityIndicator
+                  animating={true}
+                  size="large"
+                  style={{ opacity: 1 }}
+                  color="#FFB6C1"
+                />
+              ) : (
+                <View
+                  style={[
+                    tw`justify-center bg-white items-center space-around`,
+                    {
+                      marginHorizontal: "5%",
+                      paddingVertical: "5%",
+                      paddingHorizontal: "5%",
+                    },
+                  ]}
                 >
-                  <Text style={{ color: "red" }}>Ok!</Text>
-                </TouchableOpacity>
-              </View>
+                  <Text style={tw`border-b w-fit mb-2`}>
+                    Chung mung ban da thiet lap xong ho so
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setUserData(dataAfter);
+                    }}
+                    style={[tw`w-full`, { width: "100%" }]}
+                  >
+                    <Text style={{ color: "red" }}>Ok!</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
           </Modal>
         </View>
@@ -485,6 +496,29 @@ const styles = StyleSheet.create({
   textInput: {
     borderColor: "rgba(0,0,0,0.1)",
     paddingLeft: 20,
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderWidth: 0.5,
+    borderColor: "gray",
+    borderRadius: 8,
+    color: "black",
+    paddingRight: 10, // to ensure the text is never behind the icon
+  },
+  inputAndroid: {
+    fontSize: 16,
+    paddingHorizontal: 10,
+
+    borderWidth: 0.5,
+    borderColor: "gray",
+    borderRadius: 8,
+    color: "black",
+    paddingRight: 10, // to ensure the text is never behind the icon
   },
 });
 

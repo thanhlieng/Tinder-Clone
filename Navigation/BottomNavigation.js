@@ -16,7 +16,7 @@ import ProfileSetting from "../Screens/ProfileSetting";
 import Setting from "../Screens/Setting";
 import Auth from "../ggAuth/Auth";
 import Login from "../Screens/Login";
-import { useWindowDimensions } from "react-native";
+import { useWindowDimensions, Platform } from "react-native";
 import Chat from "../Screens/Chat";
 import { PixelRatio } from "react-native";
 import chat1 from "../Screens/chat1";
@@ -49,7 +49,9 @@ function BottomTabs() {
         tabBarShowLabel: false,
         tabBarActiveTintColor: "pink",
         tabBarHideOnKeyboard: true,
-        tabBarStyle: { height: height * 0.055, position: "absolute" },
+        tabBarStyle: {
+          height: Platform.OS === "android" ? height * 0.08 : height * 0.1,
+        },
       }}
     >
       {/* <BottomNavigationTab.Screen
@@ -126,7 +128,7 @@ function HomeNav() {
       <Stack.Screen name="User" component={UserProfile} />
       <Stack.Screen name="profile" component={ProfileSetting} />
       <Stack.Screen name="setting" component={Setting} />
-      <Stack.Screen name="Chat" component={chat1} />
+      <Stack.Screen name="Chat" component={Chat} />
     </Stack.Navigator>
   );
 }

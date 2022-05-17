@@ -242,6 +242,15 @@ const Message = ({ navigation }) => {
     );
   };
 
+  const setArray = (ar) => {
+    if (ar.length > 0) {
+      ar.sort(function (a, b) {
+        return new Date(b.lastUpdate) - new Date(a.lastUpdate);
+      });
+    }
+    return ar;
+  };
+
   const [text, setText] = useState("");
   const handleSearch = (text) => {
     if (text) {
@@ -296,7 +305,7 @@ const Message = ({ navigation }) => {
                   {
                     height: height * 0.04,
                     width: height * 0.04,
-                    borderRadius: 999999,
+                    borderRadius: 20,
                   },
                 ]}
               />
@@ -356,7 +365,7 @@ const Message = ({ navigation }) => {
               </Text>
               <View>
                 <FlatList
-                  data={matchingDataMess}
+                  data={setArray(matchingDataMess)}
                   renderItem={({ item }) => <MessItem data={item} />}
                   keyExtractor={(item) => item._id}
                 ></FlatList>
@@ -396,7 +405,7 @@ const styles = StyleSheet.create({
     paddingTop: 15,
   },
   matchAvt: {
-    borderRadius: 40,
+    borderRadius: 20,
   },
   messItem: {
     flexDirection: "row",
