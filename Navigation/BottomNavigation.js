@@ -1,11 +1,10 @@
 import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import Fontisto from "react-native-vector-icons/Fontisto";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import React, { useState } from "react";
+import React from "react";
 import Home from "../Screens/Home";
 import Message from "../Screens/Message";
 import Matched from "../Screens/Matched";
@@ -19,7 +18,6 @@ import Login from "../Screens/Login";
 import { useWindowDimensions, Platform } from "react-native";
 import Chat from "../Screens/Chat";
 import { PixelRatio } from "react-native";
-import chat1 from "../Screens/chat1";
 
 const BottomNavigationTab = createMaterialBottomTabNavigator();
 const Stack = createNativeStackNavigator();

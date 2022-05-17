@@ -51,7 +51,7 @@ import {
 } from "firebase/database";
 
 import { auth, db } from "../ggAuth/firebase-con";
-import { async } from "@firebase/util";
+import { Shadow } from "react-native-shadow-2";
 
 // demo purposes only
 function* range(start, end) {
@@ -156,7 +156,8 @@ const Home = ({ navigation }) => {
         key={index}
         style={{
           justifyContent: "center",
-          backgroundColor: "white",
+          backgroundColor: "transparent",
+          height: height * 0.8,
         }}
       >
         <Image
@@ -168,7 +169,7 @@ const Home = ({ navigation }) => {
           colors={["transparent", "black"]}
           style={[
             tw`absolute bottom-0 self-center`,
-            { height: "25%", width: width * 0.98, borderRadius: 10 },
+            { height: "25%", width: width * 0.9, borderRadius: 10 },
           ]}
         ></LinearGradient>
         <Pressable
@@ -193,60 +194,64 @@ const Home = ({ navigation }) => {
       <View
         style={[
           styles.card,
-          { height: Platform.OS === "android" ? height * 0.8 : height * 0.75 },
+          {
+            height: Platform.OS === "android" ? height * 0.8 : height * 0.75,
+          },
         ]}
       >
-        <Carousel
-          layout="tinder"
-          ref={Carouselref}
-          data={card.image}
-          sliderWidth={width * 0.98}
-          itemWidth={width * 0.98}
-          renderItem={renderImage}
-          inactiveSlideShift={0}
-          useScrollView={true}
-          scrollEnabled={false}
-          onSnapToItem={(index) => setdotIndex(index)}
-          style={tw`bg-red-500`}
-        />
-        <Pagination
-          containerStyle={{
-            position: "absolute",
-            backgroundColor: "transparent",
-            right: 0,
-            top: 0,
-          }}
-          renderDots={(activeIndex) => (
-            <View
-              style={{
-                backgroundColor: "rgba(0,0,0,0.7)",
-                alignItems: "center",
-                padding: 5,
-                borderRadius: 99999,
-                paddingLeft: 8,
-                paddingRight: 8,
-              }}
-            >
-              <Text
-                style={{ color: "white", fontWeight: "bold", fontSize: 15 }}
+        <Shadow distance={10} startColor={"#00000010"} radius={10}>
+          <Carousel
+            layout="tinder"
+            ref={Carouselref}
+            data={card.image}
+            sliderWidth={width * 0.9}
+            itemWidth={width * 0.9}
+            renderItem={renderImage}
+            inactiveSlideShift={0}
+            useScrollView={true}
+            scrollEnabled={false}
+            onSnapToItem={(index) => setdotIndex(index)}
+            style={tw`bg-red-500`}
+          />
+          <Pagination
+            containerStyle={{
+              position: "absolute",
+              backgroundColor: "transparent",
+              right: 0,
+              top: 0,
+            }}
+            renderDots={(activeIndex) => (
+              <View
+                style={{
+                  backgroundColor: "rgba(0,0,0,0.7)",
+                  alignItems: "center",
+                  padding: 5,
+                  borderRadius: 99999,
+                  paddingLeft: 8,
+                  paddingRight: 8,
+                }}
               >
-                {activeIndex + 1}/{card.image.length}
-              </Text>
-            </View>
-          )}
-          activeDotIndex={dotindex}
-          dotsLength={5}
-        />
-        <View style={[tw`absolute bottom-0 w-full`, { height: "20%" }]}>
-          <Text
-            style={[
-              tw`font-bold ml-5 text-white`,
-              { fontSize: 20 / fontScale },
-            ]}
-          >
-            {card.userName} {fullYear.getFullYear() - card.birthYear}
-          </Text>
-        </View>
+                <Text
+                  style={{ color: "white", fontWeight: "bold", fontSize: 15 }}
+                >
+                  {activeIndex + 1}/{card.image.length}
+                </Text>
+              </View>
+            )}
+            activeDotIndex={dotindex}
+            dotsLength={5}
+          />
+          <View style={[tw`absolute bottom-0 w-full`, { height: "20%" }]}>
+            <Text
+              style={[
+                tw`font-bold ml-8 text-white`,
+                { fontSize: 20 / fontScale },
+              ]}
+            >
+              {card.userName} {fullYear.getFullYear() - card.birthYear}
+            </Text>
+          </View>
+        </Shadow>
       </View>
     );
   };
@@ -331,21 +336,24 @@ const Home = ({ navigation }) => {
             {
               justifyContent: "center",
               alignItems: "center",
-              marginTop: height * 0.02,
+              marginTop: height * 0.03,
               marginBottom: height * 0.02,
-              height: Platform.OS === "android" ? height * 0.8 : height * 0.75,
+              height: Platform.OS === "android" ? height * 0.85 : height * 0.75,
+              backgroundColor: "white",
+              elevation: 20,
+              shadowColor: "#52006A",
             },
           ]}
         >
           <Swiper
             ref={Swiperef}
-            backgroundColor={"#F2F2F2"}
+            backgroundColor={"transparent"}
             cards={allData}
             cardIndex={0}
             renderCard={(card) => <RenderCard card={card} />}
             verticalSwipe={false}
             cardVerticalMargin={0}
-            cardHorizontalMargin={width * 0.01}
+            cardHorizontalMargin={0}
             overlayLabels={{
               left: {
                 title: "NOPE",
@@ -379,7 +387,7 @@ const Home = ({ navigation }) => {
                     alignItems: "flex-start",
                     justifyContent: "flex-start",
                     marginTop: 10,
-                    marginLeft: 10,
+                    marginLeft: 25,
                   },
                 },
               },
@@ -392,7 +400,10 @@ const Home = ({ navigation }) => {
             }}
           >
             <GestureHandlerRootView
-              style={tw`absolute bottom-0 flex-row justify-around w-full items-end`}
+              style={[
+                tw`absolute bottom-0 flex-row justify-around w-full items-end`,
+                { marginBottom: height * 0.06, height: height * 0.2 },
+              ]}
             >
               <TapGestureHandler onGestureEvent={lefteventHandler}>
                 <Animated.View style={[tw`rounded-full `, leftTouchAnimation]}>
@@ -401,8 +412,8 @@ const Home = ({ navigation }) => {
                     style={[
                       tw` justify-center rounded-full border-red-500 border-2 `,
                       {
-                        width: PixelRatio.getPixelSizeForLayoutSize(19),
-                        height: PixelRatio.getPixelSizeForLayoutSize(19),
+                        width: width * 0.15,
+                        height: width * 0.15,
                         flexWrap: "wrap-reverse",
                       },
                     ]}
@@ -411,7 +422,7 @@ const Home = ({ navigation }) => {
                       style={tw`self-center absolute`}
                       name="window-close"
                       color={"red"}
-                      size={PixelRatio.getPixelSizeForLayoutSize(18)}
+                      size={PixelRatio.getPixelSizeForLayoutSize(20)}
                     />
                   </TouchableWithoutFeedback>
                 </Animated.View>
@@ -425,8 +436,8 @@ const Home = ({ navigation }) => {
                     style={[
                       tw`justify-center rounded-full border-green-500 border-2 bg-transparent`,
                       {
-                        width: PixelRatio.getPixelSizeForLayoutSize(19),
-                        height: PixelRatio.getPixelSizeForLayoutSize(19),
+                        width: width * 0.15,
+                        height: width * 0.15,
                       },
                     ]}
                   >
@@ -434,7 +445,7 @@ const Home = ({ navigation }) => {
                       style={tw`self-center absolute`}
                       name="heart"
                       color={"green"}
-                      size={PixelRatio.getPixelSizeForLayoutSize(18)}
+                      size={PixelRatio.getPixelSizeForLayoutSize(20)}
                     />
                   </TouchableWithoutFeedback>
                 </Animated.View>
@@ -449,7 +460,7 @@ const Home = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "transparent",
+    backgroundColor: "white",
     marginTop: StatusBar.currentHeight,
     justifyContent: "center",
     alignContent: "center",
@@ -457,7 +468,8 @@ const styles = StyleSheet.create({
   card: {
     borderColor: "#E8E8E8",
     justifyContent: "center",
-    backgroundColor: "white",
+    backgroundColor: "transparent",
+    alignItems: "center",
   },
   text: {
     textAlign: "center",
