@@ -118,9 +118,8 @@ const styles = StyleSheet.create({
   icon: {
     backgroundColor: "white",
     padding: 7,
-    borderRadius: 9999,
     borderColor: "rgba(0, 0, 0, 0.5)",
-    borderRadius: 99999,
+    borderRadius: 999,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,

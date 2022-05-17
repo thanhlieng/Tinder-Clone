@@ -157,7 +157,7 @@ const Home = ({ navigation }) => {
         style={{
           justifyContent: "center",
           backgroundColor: "transparent",
-          height: height * 0.8,
+          height: height * 0.6,
         }}
       >
         <Image
@@ -241,7 +241,7 @@ const Home = ({ navigation }) => {
             activeDotIndex={dotindex}
             dotsLength={5}
           />
-          <View style={[tw`absolute bottom-0 w-full`, { height: "20%" }]}>
+          <View style={[tw`absolute bottom-0 w-full`, { height: "40%" }]}>
             <Text
               style={[
                 tw`font-bold ml-8 text-white`,
@@ -294,6 +294,7 @@ const Home = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#ecf0f1" />
       <View
         style={[
           tw`flex-row justify-evenly items-center bg-white w-full`,
@@ -336,7 +337,7 @@ const Home = ({ navigation }) => {
             {
               justifyContent: "center",
               alignItems: "center",
-              marginTop: height * 0.03,
+              marginTop: height * 0.02,
               marginBottom: height * 0.02,
               height: Platform.OS === "android" ? height * 0.85 : height * 0.75,
               backgroundColor: "white",
@@ -402,7 +403,7 @@ const Home = ({ navigation }) => {
             <GestureHandlerRootView
               style={[
                 tw`absolute bottom-0 flex-row justify-around w-full items-end`,
-                { marginBottom: height * 0.06, height: height * 0.2 },
+                { marginBottom: height * 0.04, height: height * 0.2 },
               ]}
             >
               <TapGestureHandler onGestureEvent={lefteventHandler}>
@@ -422,7 +423,7 @@ const Home = ({ navigation }) => {
                       style={tw`self-center absolute`}
                       name="window-close"
                       color={"red"}
-                      size={PixelRatio.getPixelSizeForLayoutSize(20)}
+                      size={PixelRatio.getPixelSizeForLayoutSize(18)}
                     />
                   </TouchableWithoutFeedback>
                 </Animated.View>
@@ -445,7 +446,7 @@ const Home = ({ navigation }) => {
                       style={tw`self-center absolute`}
                       name="heart"
                       color={"green"}
-                      size={PixelRatio.getPixelSizeForLayoutSize(20)}
+                      size={PixelRatio.getPixelSizeForLayoutSize(18)}
                     />
                   </TouchableWithoutFeedback>
                 </Animated.View>
@@ -460,7 +461,6 @@ const Home = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "white",
     marginTop: StatusBar.currentHeight,
     justifyContent: "center",
     alignContent: "center",
