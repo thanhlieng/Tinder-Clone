@@ -104,24 +104,24 @@ export default function Chat({ route, navigation }) {
   //   return snapshot.val();
   // }, []);
 
-  if (chatroomsId) {
-    useEffect(() => {
-      const database = getDatabase();
-      //load old messages
-      const loadData = async () => {
-        const snap = await get(
-          ref(database, `chatrooms/${chatroomsId}/messages`)
-        );
-        const dataMess = snap.val();
-        if (dataMess[dataMess.length - 1].user._id !== user.uid) {
-          dataMess[dataMess.length - 1]._seen = true;
-        }
-        update(ref(database, `chatrooms/${roomId}`), {
-          messages: dataMess,
-        });
-        setMessages(dataMess.reverse());
-      };
+  useEffect(() => {
+    const database = getDatabase();
+    //load old messages
+    const loadData = async () => {
+      const snap = await get(
+        ref(database, `chatrooms/${chatroomsId}/messages`)
+      );
+      const dataMess = snap.val();
+      if (dataMess[dataMess.length - 1].user._id !== user.uid) {
+        dataMess[dataMess.length - 1]._seen = true;
+      }
+      update(ref(database, `chatrooms/${roomId}`), {
+        messages: dataMess,
+      });
+      setMessages(dataMess.reverse());
+    };
 
+    if (roomId) {
       loadData();
       const chatroomRef = ref(database, `chatrooms/${chatroomsId}`);
       onValue(chatroomRef, (snapshot) => {
@@ -133,8 +133,8 @@ export default function Chat({ route, navigation }) {
         //remove chatroom listener
         off(chatroomRef);
       };
-    }, [chatroomsId]);
-  }
+    }
+  }, [roomId]);
 
   const handleUrlPress = (url, matchIndex /*: number*/) => {
     // Linking.openURL(url);
@@ -289,7 +289,7 @@ export default function Chat({ route, navigation }) {
               }}
               wrapperStyle={{
                 left: {
-                  backgroundColor: "#FF63ED",
+                  backgroundColor: "#828282",
                 },
               }}
             />

@@ -5,7 +5,7 @@ import { useNavigation } from "@react-navigation/core";
 import tw from "tailwind-react-native-classnames";
 import navigation from "@react-navigation/native-stack";
 
-const Login = () => {
+function Login() {
   const { SigninGoogle, userData, user, Loading } = Auth();
   const navigation = useNavigation();
 
@@ -30,6 +30,6 @@ const Login = () => {
       </ImageBackground>
     </View>
   );
-};
+}
 
 export default Login;

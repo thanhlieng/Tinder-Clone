@@ -18,8 +18,12 @@ import Login from "../Screens/Login";
 import { useWindowDimensions, Platform } from "react-native";
 import Chat from "../Screens/Chat";
 import { PixelRatio } from "react-native";
+import ModalHome from "../Screens/ModalHome";
+import {
+  CardStyleInterpolators,
+  TransitionPresets,
+} from "@react-navigation/stack";
 
-const BottomNavigationTab = createMaterialBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -32,14 +36,26 @@ const screenOptionStyle = {
   headerTitleAlign: "center",
 };
 
+const HomeModal = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Group>
+        <Stack.Screen name="HomeM" component={Home} />
+      </Stack.Group>
+      <Stack.Group screenOptions={{ presentation: "modal" }}>
+        <Stack.Screen name="MyModal" component={ModalHome} />
+      </Stack.Group>
+    </Stack.Navigator>
+  );
+};
+
 function BottomTabs() {
   const { height, width } = useWindowDimensions();
   return (
     <Tab.Navigator
       activeColor="#FF565B"
       inactiveColor="#C7C7C7"
-      shifting={false}
-      barStyle={{ backgroundColor: "#60EBB3", height: height * 0.5 }}
+      shifting={true}
       labeled={false}
       initialRouteName="MainHome"
       screenOptions={{
@@ -112,39 +128,34 @@ function BottomTabs() {
 
 function HomeNav() {
   return (
-    <Stack.Navigator initialRouteName="Home" screenOptions={screenOptionStyle}>
-      <Stack.Screen
-        name="Home"
-        component={BottomTabs}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="match"
-        component={Matched}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen name="User" component={UserProfile} />
-      <Stack.Screen name="profile" component={ProfileSetting} />
-      <Stack.Screen name="setting" component={Setting} />
-      <Stack.Screen name="Chat" component={Chat} />
+    <Stack.Navigator initialRouteName="Home">
+      <Stack.Group screenOptions={screenOptionStyle}>
+        <Stack.Screen
+          name="Home"
+          component={BottomTabs}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="match"
+          component={Matched}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen name="User" component={UserProfile} />
+        <Stack.Screen name="Profile" component={ProfileSetting} />
+        <Stack.Screen name="Setting" component={Setting} />
+        <Stack.Screen name="Chat" component={Chat} />
+      </Stack.Group>
+      <Stack.Group
+        screenOptions={{ presentation: "modal", headerShown: false }}
+      >
+        <Stack.Screen name="MyModal" component={ModalHome} />
+      </Stack.Group>
     </Stack.Navigator>
   );
 }
 
-function LoginNav() {
-  return (
-    <Stack.Navigator
-      screenOptions={{ headerShown: false }}
-      initialRouteName="Login"
-    >
-      <Stack.Screen name="Login" component={Login} />
-      <Stack.Screen name="Modal" component={ModalProfile} />
-      <Stack.Screen name="Main" component={HomeNav} />
-    </Stack.Navigator>
-  );
-}
-
-const BottomNavigation = () => {
+function BottomNavigation() {
   const { user, userData } = Auth();
 
   return (
@@ -189,8 +200,8 @@ const BottomNavigation = () => {
             />
           ) : (
             <Stack.Screen
-              name="login"
-              component={LoginNav}
+              name="Login"
+              component={Login}
               options={{ headerShown: false }}
             />
           )}
@@ -198,6 +209,6 @@ const BottomNavigation = () => {
       )}
     </Stack.Navigator>
   );
-};
+}
 
 export default BottomNavigation;

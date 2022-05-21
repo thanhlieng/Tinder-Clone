@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import tw from "tailwind-react-native-classnames";
-import Feather from "react-native-vector-icons/Feather";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Auth from "../ggAuth/Auth";
 import { LinearGradient } from "expo-linear-gradient";
@@ -52,6 +52,7 @@ import {
 
 import { auth, db } from "../ggAuth/firebase-con";
 import { Shadow } from "react-native-shadow-2";
+import { Modal } from "react-native-paper";
 
 // demo purposes only
 function* range(start, end) {
@@ -60,7 +61,7 @@ function* range(start, end) {
   }
 }
 
-const Home = ({ navigation }) => {
+function Home({ navigation }) {
   const { height, width, fontScale } = useWindowDimensions();
   const [cardIndex, setcardIndex] = useState(0);
   const { user, Logout, userData, likedData } = Auth();
@@ -71,6 +72,8 @@ const Home = ({ navigation }) => {
   const [dotindex, setIndex] = useState(0);
   const [allData, setDataFetched] = useState([]);
   const [loading, setloading] = useState(true);
+  const [modelVisible, setVisible] = useState(false);
+  const [datatoModel, setdatatoModel] = useState();
 
   const fullYear = new Date();
   const tabBarHeight = useBottomTabBarHeight();
@@ -157,7 +160,7 @@ const Home = ({ navigation }) => {
         style={{
           justifyContent: "center",
           backgroundColor: "transparent",
-          height: height * 0.6,
+          height: height * 0.65,
         }}
       >
         <Image
@@ -173,11 +176,11 @@ const Home = ({ navigation }) => {
           ]}
         ></LinearGradient>
         <Pressable
-          style={[tw`absolute h-full right-0`, { width: "30%" }]}
+          style={[tw`absolute right-0 top-0`, { width: "30%", height: "80%" }]}
           onPress={() => Carouselref.current.snapToNext()}
         />
         <Pressable
-          style={[tw`absolute h-full`, { width: "30%" }]}
+          style={[tw`absolute top-0`, { width: "30%", height: "80%" }]}
           onPress={() => Carouselref.current.snapToPrev()}
         />
       </View>
@@ -241,7 +244,12 @@ const Home = ({ navigation }) => {
             activeDotIndex={dotindex}
             dotsLength={5}
           />
-          <View style={[tw`absolute bottom-0 w-full`, { height: "40%" }]}>
+          <View
+            style={[
+              tw`absolute bottom-0 w-full`,
+              { height: "35%", flexDirection: "row" },
+            ]}
+          >
             <Text
               style={[
                 tw`font-bold ml-8 text-white`,
@@ -250,6 +258,22 @@ const Home = ({ navigation }) => {
             >
               {card.userName} {fullYear.getFullYear() - card.birthYear}
             </Text>
+            <Pressable
+              onPress={() => {
+                navigation.navigate("MyModal", {
+                  active: dotindex,
+                  data: card,
+                });
+              }}
+              style={[tw`ml-2 `, {}]}
+            >
+              <MaterialCommunityIcons
+                style={tw``}
+                name="information-outline"
+                color={"white"}
+                size={PixelRatio.getPixelSizeForLayoutSize(10)}
+              />
+            </Pressable>
           </View>
         </Shadow>
       </View>
@@ -294,7 +318,12 @@ const Home = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ecf0f1" />
+      {Platform.OS === "android" ? (
+        <View></View>
+      ) : (
+        <StatusBar barStyle="dark-content" backgroundColor="#ecf0f1" />
+      )}
+
       <View
         style={[
           tw`flex-row justify-evenly items-center bg-white w-full`,
@@ -341,8 +370,6 @@ const Home = ({ navigation }) => {
               marginBottom: height * 0.02,
               height: Platform.OS === "android" ? height * 0.85 : height * 0.75,
               backgroundColor: "white",
-              elevation: 20,
-              shadowColor: "#52006A",
             },
           ]}
         >
@@ -403,7 +430,7 @@ const Home = ({ navigation }) => {
             <GestureHandlerRootView
               style={[
                 tw`absolute bottom-0 flex-row justify-around w-full items-end`,
-                { marginBottom: height * 0.04, height: height * 0.2 },
+                { marginBottom: height * 0.01, height: height * 0.2 },
               ]}
             >
               <TapGestureHandler onGestureEvent={lefteventHandler}>
@@ -442,7 +469,7 @@ const Home = ({ navigation }) => {
                       },
                     ]}
                   >
-                    <Foundation
+                    <MaterialCommunityIcons
                       style={tw`self-center absolute`}
                       name="heart"
                       color={"green"}
@@ -455,15 +482,46 @@ const Home = ({ navigation }) => {
           </Swiper>
         </View>
       )}
+      <Modal
+        visible={modelVisible}
+        onRequestClose={() => {
+          Alert.alert("Modal has been closed.");
+        }}
+        animationType="fade"
+        transparent={true}
+        style={{ flex: 1, backgroundColor: "green" }}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignContent: "center",
+            backgroundColor: "white",
+          }}
+        >
+          <Pressable
+            onPress={() => setVisible(false)}
+            style={{ backgroundColor: "green" }}
+          >
+            <MaterialCommunityIcons
+              style={tw``}
+              name="arrow-down-drop-circle"
+              color={"black"}
+              size={PixelRatio.getPixelSizeForLayoutSize(20)}
+            />
+          </Pressable>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     marginTop: StatusBar.currentHeight,
     justifyContent: "center",
     alignContent: "center",
+    backgroundColor: "transparent",
   },
   card: {
     borderColor: "#E8E8E8",

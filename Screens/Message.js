@@ -28,7 +28,7 @@ import {
 import { db } from "../ggAuth/firebase-con";
 import { doc, getDoc } from "firebase/firestore";
 
-const Message = ({ navigation }) => {
+function Message({ navigation }) {
   const { width, height, fontScale } = useWindowDimensions();
   const { user, Logout, userData, matchData, chatrooms } = Auth();
   const [loadingMatch, setLoadingMatch] = useState(true);
@@ -376,7 +376,7 @@ const Message = ({ navigation }) => {
       )}
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

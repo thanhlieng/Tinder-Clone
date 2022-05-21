@@ -15,7 +15,7 @@ import Auth from "../ggAuth/Auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../ggAuth/firebase-con";
 
-const LikedU = ({ navigation }) => {
+function LikedU({ navigation }) {
   const { height, width, fontScale } = useWindowDimensions();
   const { user, userData, likedData } = Auth();
 
@@ -108,7 +108,7 @@ const LikedU = ({ navigation }) => {
       </ScrollView>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

@@ -25,7 +25,7 @@ import {
   push,
 } from "firebase/database";
 
-const Matched = ({ route, navigation: { goBack }, navigation }) => {
+function Matched({ route, navigation: { goBack }, navigation }) {
   const { user, userData } = Auth();
   const { matchId } = route.params;
   const { height, width } = useWindowDimensions();
@@ -133,7 +133,7 @@ const Matched = ({ route, navigation: { goBack }, navigation }) => {
       )}
     </SafeAreaView>
   );
-};
+}
 
 export default Matched;
 
