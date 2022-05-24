@@ -15,7 +15,7 @@ import ProfileSetting from "../Screens/ProfileSetting";
 import Setting from "../Screens/Setting";
 import Auth from "../ggAuth/Auth";
 import Login from "../Screens/Login";
-import { useWindowDimensions, Platform } from "react-native";
+import { useWindowDimensions, Platform, ActivityIndicator } from "react-native";
 import Chat from "../Screens/Chat";
 import { PixelRatio } from "react-native";
 import ModalHome from "../Screens/ModalHome";
@@ -156,7 +156,7 @@ function HomeNav() {
 }
 
 function BottomNavigation() {
-  const { user, userData } = Auth();
+  const { user, userData, Loading } = Auth();
 
   return (
     <Stack.Navigator screenOptions={screenOptionStyle}>
@@ -183,27 +183,37 @@ function BottomNavigation() {
           options={{ headerShown: false }}
         />
       )} */}
-
-      {user && userData ? (
-        <Stack.Screen
-          name="Home1"
-          component={HomeNav}
-          options={{ headerShown: false }}
+      {Loading ? (
+        <ActivityIndicator
+          animating={true}
+          size="large"
+          style={{ opacity: 1 }}
+          color="#999999"
         />
       ) : (
         <>
-          {user ? (
+          {user && userData ? (
             <Stack.Screen
-              name="Modal"
-              component={ModalProfile}
+              name="Home1"
+              component={HomeNav}
               options={{ headerShown: false }}
             />
           ) : (
-            <Stack.Screen
-              name="Login"
-              component={Login}
-              options={{ headerShown: false }}
-            />
+            <>
+              {user ? (
+                <Stack.Screen
+                  name="Modal"
+                  component={ModalProfile}
+                  options={{ headerShown: false }}
+                />
+              ) : (
+                <Stack.Screen
+                  name="Login"
+                  component={Login}
+                  options={{ headerShown: false }}
+                />
+              )}
+            </>
           )}
         </>
       )}
